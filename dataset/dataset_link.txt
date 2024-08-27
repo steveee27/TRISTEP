@@ -1,0 +1,21 @@
+-- assets
+    -- background
+    -- logo
+    -- tagline
+-- preprocessed
+    -- preprocessed_linkedin
+-- source
+    -- linkedin
+        -- benefits
+        -- companies
+        -- company_industries
+        -- company_specialities
+        -- employee_counts
+        -- job_industries
+        -- job_postings
+        -- job_skills
+    -- online_course
+        -- Online_Courses
+-- test_cases
+    -- test_case_course
+    -- test_case_job
