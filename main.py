@@ -10,12 +10,13 @@ import gdown
 
 st.set_page_config(page_title="TriStep - Career and Learning Recommendation System", page_icon="🚀", layout="wide")
 
+# Function definitions
 def preprocess_text_simple(text):
     if pd.isna(text):
         return ""
     text = text.lower()
     text = text.translate(str.maketrans('', '', string.punctuation))
-    text = re.sub(r'\*+', '', text)
+    text = re.sub(r'\*+', '', text)  # Remove asterisks
     return text
 
 def remove_asterisks(text):
@@ -24,6 +25,7 @@ def remove_asterisks(text):
     return re.sub(r'\*+', '', text)
 
 def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, work_types, name):
+    # Filter dataset based on user choices
     filtered_df = df.copy()
     if experience_levels:
         filtered_df = filtered_df[filtered_df['formatted_experience_level'].isin(experience_levels)]
@@ -32,28 +34,37 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, w
     if name and name != 'All':
         filtered_df = filtered_df[filtered_df['name'] == name]
     
+    # Check if filtered dataset is empty
     if filtered_df.empty:
-        return None
+        return None  # Return None if no matching jobs found
 
+    # Preprocess user input
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
+    # Calculate cosine similarities across the dataset
     cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix[filtered_df.index]).flatten()
     
+    # Filter out results with 0 similarity
     above_zero = cosine_similarities > 0
     if not any(above_zero):
-        return None
+        return None  # Return None if no jobs have similarity > 0
 
+    # Calculate the 95th percentile threshold among non-zero similarities
     threshold = np.percentile(cosine_similarities[above_zero], 95)
     
+    # Filter courses based on the threshold
     above_threshold = cosine_similarities >= threshold
     top_course_indices = np.where(above_threshold)[0]
     
+    # Sort the filtered courses by similarity
     top_course_indices = top_course_indices[np.argsort(cosine_similarities[top_course_indices])[::-1]]
     
+    # Create DataFrame with numbering
     top_courses = filtered_df.iloc[top_course_indices].copy()
     top_courses.reset_index(drop=True, inplace=True)
     
+    # Add cosine similarity column
     top_courses['cosine_similarity'] = cosine_similarities[top_course_indices]
     
     return top_courses
@@ -81,9 +92,10 @@ def change_page(direction):
         st.session_state.page += direction
     else:
         st.session_state.page = 0
-
+# Function to convert salary to yearly salary
 def convert_to_yearly(salary, pay_period):
     try:
+        # Ensure the salary is a float for numerical operations
         salary = float(salary)
         
         if pay_period == 'YEARLY':
@@ -91,19 +103,22 @@ def convert_to_yearly(salary, pay_period):
         elif pay_period == 'MONTHLY':
             return salary * 12
         elif pay_period == 'HOURLY':
-            return salary * 40 * 52
+            return salary * 40 * 52  # Assuming 40 hours per week and 52 weeks per year
         else:
-            return 'Unknown'
+            return 'Unknown'  # Handle unexpected pay_period values
     except (ValueError, TypeError):
-        return 'Unknown'
+        return 'Unknown'  # Handle cases where salary isn't a number
 
+# Applying the conversion to both 'min_salary' and 'max_salary' columns
 def preprocess_salary(df):
     df['min_salary'] = df.apply(lambda x: convert_to_yearly(x['min_salary'], x['pay_period']), axis=1)
     df['max_salary'] = df.apply(lambda x: convert_to_yearly(x['max_salary'], x['pay_period']), axis=1)
     return df
 
+# Load datasets
 @st.cache_data
 def load_job_data():
+    # Download LinkedIn dataset from Google Drive
     url = 'https://drive.google.com/uc?export=download&id=1fBOB-dm_BJasoJfA_CwUFMBINwgvWPeW'
     output = 'linkedin.csv'
     gdown.download(url, output, quiet=False)
@@ -117,6 +132,7 @@ def load_job_data():
 
 @st.cache_data
 def load_course_data():
+    # Download Online Course dataset from Google Drive
     url = 'https://drive.google.com/uc?id=1tnpLFGqbmGRU_EDxUpuMCupx4-HJxEqF'
     output = 'Online_Courses.csv'
     gdown.download(url, output, quiet=False)
@@ -165,145 +181,130 @@ def load_course_data():
     tfidf_matrix_course = vectorizer_course.fit_transform(df_course['combined'])
     return df_course, vectorizer_course, tfidf_matrix_course
 
+# Download and cache images
 @st.cache_data
 def download_images():
+    # Download Minimalist Black and White Blank Paper Document (1)
     url1 = 'https://drive.google.com/uc?id=1lhfFczKatGDEuq3ux2y-AqfPpVC96UZ9'
     output1 = 'Minimalist_Black_and_White_Blank_Paper_Document_1.png'
     gdown.download(url1, output1, quiet=False)
 
+    # Download nobg2
     url2 = 'https://drive.google.com/uc?id=1hbpQIE7Ez0Z4k1Sfq8FSO80_5HRujdjP'
     output2 = 'nobg2.png'
     gdown.download(url2, output2, quiet=False)
 
     return output1, output2
 
+# Load data
 df_job, vectorizer_job, tfidf_matrix_job = load_job_data()
 df_job = preprocess_salary(df_job)
 df_job.fillna("Unknown", inplace=True)
 df_course, vectorizer_course, tfidf_matrix_course = load_course_data()
 
+# Download images
 image1_path, image2_path = download_images()
 
+# Styling
 st.markdown(
     """
     <style>
-    body, .stApp {
-        color: var(--text-color) !important;
-        background-color: var(--background-color) !important;
-    }
-    
-    .main, .css-1d391kg, .css-1v3fvcr, .css-k1vhr4 {
-        background-color: var(--background-color) !important;
-        color: var(--text-color) !important;
+    .main {
+        background-color: #f0f8ff;
         padding: 20px;
         border-radius: 10px;
     }
-    
     .stButton button {
         background-color: #4169e1;
         color: white;
         border-radius: 5px;
         transition: all 0.3s;
     }
-    
     .stButton button:hover {
         background-color: #1e90ff;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
-    
     .stButton.get-recommendations button {
         font-size: 18px !important;
         padding: 10px 20px !important;
         width: auto !important;
         height: auto !important;
     }
-    
     .stButton.navigation button {
         font-size: 14px !important;
         width: 100% !important;
         height: 40px !important;
         white-space: nowrap !important;
     }
-    
     .st-expander {
-        border: 1px solid var(--border-color) !important;
+        border: 1px solid #b0c4de;
         padding: 10px;
         border-radius: 5px;
-        background-color: var(--section-background-color) !important;
-        color: var(--text-color) !important;
+        background-color: #f8f8ff;
     }
-    
     .st-expander p {
         margin: 0;
     }
-    
     .search-box {
         width: 100%;
         padding: 10px;
         margin-top: 10px;
         border: 2px solid #4169e1;
         border-radius: 5px;
-        background-color: var(--section-background-color) !important;
-        color: var(--text-color) !important;
     }
-    
     .stButton.get-recommendations {
         display: flex;
         justify-content: center;
         margin-top: 20px;
         margin-bottom: 20px;
     }
-    
-    h1, h2, h3, p, span, div {
-        color: var(--text-color) !important;
+    h1, h2, h3 {
+        color: #191970;
     }
-    
-    .stSidebar, [data-testid="stSidebar"] {
-        background-color: var(--sidebar-background-color) !important;
-        color: var(--text-color) !important;
+    .stSidebar {
+        background-color: #e6e6fa;
         padding: 20px;
     }
-    
     .stSidebar .stRadio > label {
         font-size: 18px !important;
         margin-bottom: 15px !important;
-        color: var(--text-color) !important;
     }
-    
     .stSidebar .stRadio > div {
-        margin-bottom: 20px !important;
+        margin-bottom: 20px !important.
     }
-    
     .stSidebar [data-testid="stMarkdownContainer"] > p {
         font-size: 16px !important;
-        line-height: 1.5 !important;
-        color: var(--text-color) !important;
+        line-height: 1.5 !important.
     }
-    
     .stSidebar [data-testid="stVerticalBlock"] {
-        gap: 25px !important;
+        gap: 25px !important.
     }
-    
-    .section, .css-1544g2n {
-        background-color: var(--section-background-color) !important;
-        color: var(--text-color) !important;
-        padding: 20px;
+    .main .stTextInput > div > div > input {
+        font-size: 16px !important.
+    }
+    .main .stSelectbox > div > div > div {
+        font-size: 16px !important.
+    }
+    .main .stCheckbox > label {
+        font-size: 16px !important.
+    }
+    .section {
+        background-color: #ffffff;
+        padding: 0px;
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         margin-bottom: 20px;
     }
-    
     .tooltip {
         position: relative;
         display: inline-block;
         cursor: help;
     }
-    
     .tooltip .tooltiptext {
         visibility: hidden;
         width: 300px;
-        background-color: var(--tooltip-background-color);
-        color: var(--tooltip-text-color);
+        background-color: #555;
+        color: #fff;
         text-align: left;
         border-radius: 6px;
         padding: 10px;
@@ -315,57 +316,20 @@ st.markdown(
         opacity: 0;
         transition: opacity 0.3s;
     }
-    
     .tooltip:hover .tooltiptext {
         visibility: visible;
         opacity: 1;
-    }
-    
-    .stTextInput > div > div > input,
-    .stSelectbox > div > div > div,
-    .stCheckbox > label {
-        color: var(--text-color) !important;
-        background-color: var(--section-background-color) !important;
-    }
-    
-    .css-1544g2n, .css-1kyxreq, .css-12w0qpk {
-        background-color: var(--section-background-color) !important;
-        color: var(--text-color) !important;
-    }
-    
-    @media (prefers-color-scheme: light) {
-        :root {
-            --background-color: #f0f8ff;
-            --section-background-color: #ffffff;
-            --sidebar-background-color: #e6e6fa;
-            --text-color: #333333;
-            --heading-color: #191970;
-            --border-color: #b0c4de;
-            --tooltip-background-color: #f8f8f8;
-            --tooltip-text-color: #333333;
-        }
-    }
-    
-    @media (prefers-color-scheme: dark) {
-        :root {
-            --background-color: #1e1e1e;
-            --section-background-color: #2d2d2d;
-            --sidebar-background-color: #2d2d2d;
-            --text-color: #e0e0e0;
-            --heading-color: #ffffff;
-            --border-color: #4a4a4a;
-            --tooltip-background-color: #3d3d3d;
-            --tooltip-text-color: #ffffff;
-        }
     }
     </style>
     """, 
     unsafe_allow_html=True
 )
 
+# Initialize session state
 if 'page' not in st.session_state:
     st.session_state.page = 'dashboard'
 
+# Sidebar for navigation
 st.sidebar.title("🧭 Navigation")
 st.sidebar.markdown("---")
 st.sidebar.image(image1_path, use_column_width=True)
@@ -375,12 +339,16 @@ st.sidebar.markdown("---")
 st.sidebar.markdown("© 2024 TriStep 🚀")
 st.sidebar.markdown("Created By M-Tree")
 
+# Di bagian awal kode, setelah inisialisasi session state lainnya
 if 'previous_page' not in st.session_state:
     st.session_state.previous_page = None
 
-current_page = page
+# Setelah pemilihan halaman
+current_page = page  # 'page' adalah variabel yang menyimpan halaman saat ini
 
+# Cek apakah halaman berubah
 if current_page != st.session_state.previous_page:
+    # Reset rekomendasi jika halaman berubah
     if 'job_recommendations' in st.session_state:
         st.session_state.job_recommendations = None
         st.session_state.job_page = 0
@@ -388,6 +356,7 @@ if current_page != st.session_state.previous_page:
         st.session_state.course_recommendations = None
         st.session_state.course_page = 0
 
+# Update halaman sebelumnya
 st.session_state.previous_page = current_page
 
 if page == '🏢 Home':
@@ -472,6 +441,7 @@ if page == '🏢 Home':
 
 elif page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
+    # Embed Tableau dashboard using HTML
     html_string = """
         <div class='tableauPlaceholder' id='viz1724606542164' style='position: relative'>
         <noscript>
@@ -517,6 +487,7 @@ elif page == '📊 Step 1: Explore':
 elif page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
 
+    # Job search filters
     st.subheader('🎚️ Experience Level')
     experience_levels = [level for level in df_job['formatted_experience_level'].unique().tolist() if level != "Unknown"]
     selected_experience_levels = []
@@ -549,12 +520,14 @@ elif page == '💼 Step 2: Find':
         recommendations = recommend_job(user_input, df_job, vectorizer_job, tfidf_matrix_job, selected_experience_levels, selected_work_types, name)
         if recommendations is None or recommendations.empty:
             st.error("😕 No relevant jobs found matching your criteria. Please try adjusting your filters or providing more details in your career profile.")
+            # Clear previous recommendations
             st.session_state.job_recommendations = None
             st.session_state.job_page = 0
         else:
             st.session_state.job_recommendations = recommendations
             st.session_state.job_page = 0
 
+    # Check if recommendations exist in the session state
     if 'job_recommendations' in st.session_state and st.session_state.job_recommendations is not None:
         recommendations = st.session_state.job_recommendations
         page = st.session_state.job_page
@@ -571,6 +544,7 @@ elif page == '💼 Step 2: Find':
             with st.expander("📄 More Info"):
                 st.markdown(f"📝 Description: {row['description_x']}")
 
+                # Safely convert salary to integer if it's not 'Unknown' or non-numeric
                 try:
                     min_salary = int(float(row['min_salary'])) if row['min_salary'] != 'Unknown' else 'Unknown'
                     min_salary_str = f"${min_salary:,}" if isinstance(min_salary, int) else 'Unknown'
@@ -583,6 +557,7 @@ elif page == '💼 Step 2: Find':
                 except ValueError:
                     max_salary_str = 'Unknown'
                 
+                # Display the salary information
                 st.markdown(f"💰 Min Salary (Yearly): {min_salary_str}")
                 st.markdown(f"💵 Max Salary (Yearly): {max_salary_str}")
                 st.markdown(f"🕒 Work Type: {row['formatted_work_type']}")
@@ -602,6 +577,7 @@ elif page == '💼 Step 2: Find':
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
     
+    # Site filter (checkboxes in two columns)
     st.subheader('🌐 Select Sites')
     unique_sites = sorted(df_course['Site'].unique())
     col1, col2 = st.columns(2)
@@ -614,10 +590,13 @@ elif page == '📚 Step 3: Grow':
             if col2.checkbox(site, key=f"site_{site}"):
                 selected_sites.append(site)
 
+    # Subtitle filter (dropdown)
+    # Subtitle filter (dropdown)
     st.subheader('🗣️ Select Subtitle Language')
     unique_subtitles = sorted(set([lang.strip() for sublist in df_course['Subtitle Languages'].dropna().str.split(',') for lang in sublist if lang.strip() != 'Unknown']))
     selected_subtitle = st.selectbox('Choose a language', ['All'] + unique_subtitles)
 
+    # User input for course preference
     user_input = st.text_area("🔍 Prompt skills or topics you'd like to learn:", 
                           height=150,
                           help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
@@ -640,6 +619,7 @@ elif page == '📚 Step 3: Grow':
         threshold_value = np.percentile(stage2['Final'], percentile_threshold)
         recommendations_final = stage2[stage2['Final'] >= threshold_value]
     
+        # Apply filters
         if selected_sites:
             recommendations_final = recommendations_final[recommendations_final['Site'].isin(selected_sites)]
         if selected_subtitle != 'All':
@@ -653,6 +633,7 @@ elif page == '📚 Step 3: Grow':
             st.session_state.course_recommendations = recommendations_final
             st.session_state.course_page = 0
     
+    # Check if recommendations exist in the session state
     if 'course_recommendations' in st.session_state and st.session_state.course_recommendations is not None:
         recommendations = st.session_state.course_recommendations
         page = st.session_state.course_page
@@ -685,5 +666,6 @@ elif page == '📚 Step 3: Grow':
                 if st.button("Next ➡️", key='course_next'):
                     st.session_state.course_page += 1
 
+# Run the Streamlit app
 if __name__ == "__main__":
-    pass
+    pass  # Main content is now handled in the sidebar
