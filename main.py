@@ -210,7 +210,7 @@ st.markdown(
     """
     <style>
     .main {
-        background-color: #f0f8ff;
+        background-color: var(--secondary-background-color);
         padding: 20px;
         border-radius: 10px;
     }
@@ -237,13 +237,14 @@ st.markdown(
         white-space: nowrap !important;
     }
     .st-expander {
-        border: 1px solid #b0c4de;
+        border: 1px solid var(--secondary-background-color);
         padding: 10px;
         border-radius: 5px;
-        background-color: #f8f8ff;
+        background-color: var(--background-color);
     }
     .st-expander p {
         margin: 0;
+        color: var(--text-color);
     }
     .search-box {
         width: 100%;
@@ -259,41 +260,47 @@ st.markdown(
         margin-bottom: 20px;
     }
     h1, h2, h3 {
-        color: #191970;
+        color: var(--text-color);
     }
     .stSidebar {
-        background-color: #e6e6fa;
+        background-color: var(--secondary-background-color);
         padding: 20px;
     }
     .stSidebar .stRadio > label {
         font-size: 18px !important;
         margin-bottom: 15px !important;
+        color: var(--text-color);
     }
     .stSidebar .stRadio > div {
-        margin-bottom: 20px !important.
+        margin-bottom: 20px !important;
     }
     .stSidebar [data-testid="stMarkdownContainer"] > p {
         font-size: 16px !important;
-        line-height: 1.5 !important.
+        line-height: 1.5 !important;
+        color: var(--text-color);
     }
     .stSidebar [data-testid="stVerticalBlock"] {
-        gap: 25px !important.
+        gap: 25px !important;
     }
     .main .stTextInput > div > div > input {
-        font-size: 16px !important.
+        font-size: 16px !important;
+        color: var(--text-color);
     }
     .main .stSelectbox > div > div > div {
-        font-size: 16px !important.
+        font-size: 16px !important;
+        color: var(--text-color);
     }
     .main .stCheckbox > label {
-        font-size: 16px !important.
+        font-size: 16px !important;
+        color: var(--text-color);
     }
     .section {
-        background-color: #ffffff;
-        padding: 0px;
+        background-color: var(--background-color);
+        padding: 20px;
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         margin-bottom: 20px;
+        color: var(--text-color);
     }
     .tooltip {
         position: relative;
@@ -303,8 +310,8 @@ st.markdown(
     .tooltip .tooltiptext {
         visibility: hidden;
         width: 300px;
-        background-color: #555;
-        color: #fff;
+        background-color: var(--background-color);
+        color: var(--text-color);
         text-align: left;
         border-radius: 6px;
         padding: 10px;
@@ -315,6 +322,7 @@ st.markdown(
         margin-left: -150px;
         opacity: 0;
         transition: opacity 0.3s;
+        border: 1px solid var(--secondary-background-color);
     }
     .tooltip:hover .tooltiptext {
         visibility: visible;
