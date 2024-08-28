@@ -56,7 +56,7 @@ Data preprocessing involves cleaning and structuring both datasets to prepare th
 
 The recommendation models were trained using Kaggle Notebooks equipped with two GPU T4s, ensuring efficient computation. The models were evaluated based on `Prec@K`, focusing on how well the top `K` recommendations matched user preferences.
 
-### Results
+## Results
 
 | Method   | Prec@10 (Jobs) | Prec@10 (Courses) | Processing Time (s) |
 |----------|----------------|-------------------|---------------------|
