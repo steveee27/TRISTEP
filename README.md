@@ -73,7 +73,7 @@ You can review the detailed evaluation and analysis [here](https://www.kaggle.co
 
 - Python 3.8 or higher
 - Kaggle Notebook with two GPU T4s (optional for local development)
-- Required libraries: TensorFlow, PyTorch, Scikit-learn, Pandas, Numpy, Streamlit
+- Required libraries: Scikit-learn, Pandas, Numpy, Streamlit, gdown, psutil
 
 ## Installation
 
