@@ -2,9 +2,10 @@
 
 TRISTEP is an innovative AI-powered platform designed to bridge the gap between the supply and demand of digital talent in Indonesia. The platform helps users explore industry trends, find suitable job opportunities, and grow their skills through relevant online courses. By leveraging advanced vectorization techniques like TF-IDF, WORD2VEC, and BERT, TRISTEP delivers accurate and efficient recommendations tailored to individual user preferences.
 
-## 🚀 Live Demo
+## 🌐 Try TRISTEP Yourself
+Experience the TRISTEP platform firsthand by visiting: [Access TRISTEP Platform](https://tristep.streamlit.app/)
 
-Check out the live demo of the TRISTEP platform here: [TRISTEP Live](https://tristep.streamlit.app/)
+For a guided tour on how to use the platform, check out our live demo video: [Watch the Demo](https://your-demo-video-link)
 
 ## Table of Contents
 
