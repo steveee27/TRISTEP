@@ -241,8 +241,8 @@ st.markdown(
         color: var(--text-color);
     }
     .stSidebar {
-    background-color: #dcdcdc; 
-    padding: 20px;
+        background-color: #c1c1c1; 
+        padding: 20px;
     }
     
     .stSidebar [data-testid="stSidebarNav"] > ul {
@@ -252,17 +252,17 @@ st.markdown(
     .stSidebar [data-testid="stSidebarNav"] > ul > li:first-child {
         font-size: 24px;
         font-weight: bold;
-        color: white;
+        color: black;
     }
     
     .stSidebar [data-testid="stSidebarNav"] ul {
-        color: white;
+        color: black;
     }
     
     .stSidebar .stRadio > label {
         font-size: 18px !important;
         margin-bottom: 15px !important;
-        color: white;
+        color: black;
     }
     
     .stSidebar .stRadio > div {
@@ -272,11 +272,11 @@ st.markdown(
     .stSidebar [data-testid="stMarkdownContainer"] > p {
         font-size: 16px !important;
         line-height: 1.5 !important;
-        color: white;
+        color: black;
     }
     
     .stSidebar * {
-        color: white !important;
+        color: black !important;
     }
     .main .stTextInput > div > div > input {
         font-size: 16px !important;
