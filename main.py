@@ -279,6 +279,12 @@ st.markdown(
         line-height: 1.5 !important;
         color: white;
     }
+    .stSidebar [data-testid="stSidebarNav"] > ul > li:first-child {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    }
+    
     .stSidebar [data-testid="stVerticalBlock"] {
         gap: 25px !important;
     }
