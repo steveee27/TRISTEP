@@ -263,30 +263,45 @@ st.markdown(
         color: var(--text-color);
     }
     .stSidebar {
-        background-color: #444444; 
-        padding: 20px;
+    background-color: #808080; /* Medium gray background */
+    padding: 20px;
     }
+    
+    /* Style for the sidebar title */
+    .stSidebar [data-testid="stSidebarNav"] > ul {
+        padding-top: 20px;
+    }
+    
+    .stSidebar [data-testid="stSidebarNav"] > ul > li:first-child {
+        font-size: 24px;
+        font-weight: bold;
+        color: white; /* White color for the "Navigation" title */
+    }
+    
+    /* Style for all text in the sidebar */
+    .stSidebar [data-testid="stSidebarNav"] ul {
+        color: white;
+    }
+    
     .stSidebar .stRadio > label {
         font-size: 18px !important;
         margin-bottom: 15px !important;
         color: white;
     }
+    
     .stSidebar .stRadio > div {
         margin-bottom: 20px !important;
     }
+    
     .stSidebar [data-testid="stMarkdownContainer"] > p {
         font-size: 16px !important;
         line-height: 1.5 !important;
         color: white;
     }
-    .stSidebar [data-testid="stSidebarNav"] > ul > li:first-child {
-    font-size: 24px;
-    font-weight: bold;
-    color: white;
-    }
     
-    .stSidebar [data-testid="stVerticalBlock"] {
-        gap: 25px !important;
+    /* Ensure all text in sidebar is white */
+    .stSidebar * {
+        color: white !important;
     }
     .main .stTextInput > div > div > input {
         font-size: 16px !important;
