@@ -269,7 +269,7 @@ st.markdown(
     .stSidebar .stRadio > label {
         font-size: 18px !important;
         margin-bottom: 15px !important;
-        color: var(--text-color);
+        color: white;
     }
     .stSidebar .stRadio > div {
         margin-bottom: 20px !important;
@@ -277,7 +277,7 @@ st.markdown(
     .stSidebar [data-testid="stMarkdownContainer"] > p {
         font-size: 16px !important;
         line-height: 1.5 !important;
-        color: var(--text-color);
+        color: white;
     }
     .stSidebar [data-testid="stVerticalBlock"] {
         gap: 25px !important;
