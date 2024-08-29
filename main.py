@@ -241,7 +241,7 @@ st.markdown(
         color: var(--text-color);
     }
     .stSidebar {
-    background-color: #444444; 
+    background-color: #dcdcdc; 
     padding: 20px;
     }
     
