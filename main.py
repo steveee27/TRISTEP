@@ -263,7 +263,7 @@ st.markdown(
         color: var(--text-color);
     }
     .stSidebar {
-        background-color: #808080; 
+        background-color: #444444; 
         padding: 20px;
     }
     .stSidebar .stRadio > label {
