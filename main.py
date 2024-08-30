@@ -568,7 +568,7 @@ elif page == '💼 Step 2: Find':
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
     
-    st.subheader('🌐 Select Sites')
+    st.subheader('🌐 Sites')
     unique_sites = sorted(df_course['Site'].unique())
     col1, col2 = st.columns(2)
     selected_sites = []
@@ -580,7 +580,7 @@ elif page == '📚 Step 3: Grow':
             if col2.checkbox(site, key=f"site_{site}"):
                 selected_sites.append(site)
 
-    st.subheader('🗣️ Select Subtitle Language')
+    st.subheader('🗣️ Subtitle Language')
     unique_subtitles = sorted(set([lang.strip() for sublist in df_course['Subtitle Languages'].dropna().str.split(',') for lang in sublist if lang.strip() != 'Unknown']))
     selected_subtitle = st.selectbox('Choose a language', ['All'] + unique_subtitles)
 
