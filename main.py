@@ -337,7 +337,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Inisialisasi halaman awal jika belum ada
 if 'page' not in st.session_state:
     st.session_state.page = '🏢 Home'
 
@@ -435,9 +434,9 @@ if st.session_state.page == '🏢 Home':
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
-    if st.button("Next: Step 1 ➡️", key="home_next", help="Go to Step 1: Explore"):
+    next_page = st.button("Next: Step 1 ➡️", key="home_next", help="Go to Step 1: Explore")
+    if next_page:
         st.session_state.page = '📊 Step 1: Explore'
-        st.experimental_rerun()  
 
 elif st.session_state.page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
@@ -484,9 +483,9 @@ elif st.session_state.page == '📊 Step 1: Explore':
     """
     st.components.v1.html(html_string, width=900, height=1827)
 
-    if st.button("Next: Step 2 ➡️", key="explore_next", help="Go to Step 2: Find"):
+    next_page = st.button("Next: Step 2 ➡️", key="explore_next", help="Go to Step 2: Find")
+    if next_page:
         st.session_state.page = '💼 Step 2: Find'
-        st.experimental_rerun()
         
 elif st.session_state.page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
@@ -573,9 +572,9 @@ elif st.session_state.page == '💼 Step 2: Find':
                 if st.button("Next ➡️", key='job_next'):
                     st.session_state.job_page += 1
 
-    if st.button("Next: Step 3 ➡️", key="find_next", help="Go to Step 3: Grow"):
+    next_page = st.button("Next: Step 3 ➡️", key="find_next", help="Go to Step 3: Grow")
+    if next_page:
         st.session_state.page = '📚 Step 3: Grow'
-        st.experimental_rerun()
         
 elif st.session_state.page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
