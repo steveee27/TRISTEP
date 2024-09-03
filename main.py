@@ -337,35 +337,23 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Inisialisasi halaman awal jika belum ada
 if 'page' not in st.session_state:
-    st.session_state.page = 'dashboard'
+    st.session_state.page = '🏢 Home'
 
 st.sidebar.title("🧭 Navigation")
 st.sidebar.markdown("---")
 st.sidebar.image(image1_path, use_column_width=True)
 st.sidebar.markdown("---")
-page = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow'))
 
-st.session_state.page = page 
+page_selection = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow'))
+
+if page_selection != st.session_state.page:
+    st.session_state.page = page_selection
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("© 2024 TriStep 🚀")
 st.sidebar.markdown("Created By M-Tree")
-
-if 'previous_page' not in st.session_state:
-    st.session_state.previous_page = None
-
-current_page = st.session_state.page
-
-if current_page != st.session_state.previous_page:
-    if 'job_recommendations' in st.session_state:
-        st.session_state.job_recommendations = None
-        st.session_state.job_page = 0
-    if 'course_recommendations' in st.session_state:
-        st.session_state.course_recommendations = None
-        st.session_state.course_page = 0
-
-st.session_state.previous_page = current_page
 
 if st.session_state.page == '🏢 Home':
     col1, col2, col3 = st.columns(3)
@@ -449,6 +437,7 @@ if st.session_state.page == '🏢 Home':
 
     if st.button("Next: Step 1 ➡️", key="home_next", help="Go to Step 1: Explore"):
         st.session_state.page = '📊 Step 1: Explore'
+        st.experimental_rerun()  
 
 elif st.session_state.page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
@@ -497,6 +486,7 @@ elif st.session_state.page == '📊 Step 1: Explore':
 
     if st.button("Next: Step 2 ➡️", key="explore_next", help="Go to Step 2: Find"):
         st.session_state.page = '💼 Step 2: Find'
+        st.experimental_rerun()
         
 elif st.session_state.page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
@@ -585,6 +575,7 @@ elif st.session_state.page == '💼 Step 2: Find':
 
     if st.button("Next: Step 3 ➡️", key="find_next", help="Go to Step 3: Grow"):
         st.session_state.page = '📚 Step 3: Grow'
+        st.experimental_rerun()
         
 elif st.session_state.page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
