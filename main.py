@@ -324,6 +324,14 @@ st.markdown(
         visibility: visible;
         opacity: 1;
     }
+    .big-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 200px;
+        height: 50px;
+        font-size: 18px;
+    }
     </style>
     """, 
     unsafe_allow_html=True
@@ -436,6 +444,10 @@ if page == '🏢 Home':
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
+    if st.button("Next: Step 1 ➡️", key="home_next", help="Go to Step 1: Explore"):
+        st.session_state.previous_page = current_page
+        st.session_state.page = '📊 Step 1: Explore'
+
 elif page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
     html_string = """
@@ -480,6 +492,11 @@ elif page == '📊 Step 1: Explore':
     </script>
     """
     st.components.v1.html(html_string, width=900, height=1827)
+
+    if st.button("Next: Step 2 ➡️", key="explore_next", help="Go to Step 2: Find"):
+        st.session_state.previous_page = current_page
+        st.session_state.page = '💼 Step 2: Find'
+        
 elif page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
 
@@ -564,7 +581,11 @@ elif page == '💼 Step 2: Find':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='job_next'):
                     st.session_state.job_page += 1
-                
+
+    if st.button("Next: Step 3 ➡️", key="find_next", help="Go to Step 3: Grow"):
+        st.session_state.previous_page = current_page
+        st.session_state.page = '📚 Step 3: Grow'
+        
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
     
