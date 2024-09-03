@@ -214,6 +214,17 @@ st.markdown(
         height: 40px !important;
         white-space: nowrap !important;
     }
+    .stButton.next-button button {
+        font-size: 20px !important;  /* Ukuran font lebih besar untuk tombol Next */
+        padding: 15px 30px !important;  /* Padding lebih besar untuk memperbesar tombol */
+        background-color: #ff4b4b !important;  /* Warna latar belakang merah untuk membedakan */
+        color: white !important;  /* Warna teks putih */
+        border: none;
+        border-radius: 10px;  /* Membulatkan tombol */
+    }
+    .stButton.next-button button:hover {
+        background-color: #ff1a1a !important;  /* Warna hover untuk tombol Next */
+    }
     .st-expander {
         border: 1px solid var(--secondary-background-color);
         padding: 10px;
@@ -481,13 +492,13 @@ elif page == '📊 Step 1: Explore':
     """
     st.components.v1.html(html_string, width=900, height=1827)
 
-    # Tombol "Next: Step 2" di halaman "Step 1: Explore"
+        # Di halaman Step 1: Explore
     st.markdown("<br><br>", unsafe_allow_html=True)  # Tambahkan jarak vertikal
     col1, col2, col3 = st.columns([3, 4, 3])  # Buat kolom untuk pusatkan tombol
     with col2:  # Letakkan tombol di tengah
-        if st.button("Next: Step 2", key="next_to_step_2"):
-            st.session_state.page = '💼 Step 2: Find'  # Mengubah halaman saat tombol diklik
-
+        if st.button("Next: Step 2", key="next_to_step_2", use_container_width=True, args=(), kwargs={'css_class': 'next-button'}):
+            st.session_state.page = '💼 Step 2: Find'  # Ubah halaman di session state
+            
 elif page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
 
@@ -573,12 +584,12 @@ elif page == '💼 Step 2: Find':
                 if st.button("Next ➡️", key='job_next'):
                     st.session_state.job_page += 1
 
-    # Tombol "Next: Step 3" di halaman "Step 2: Find"
+    # Di halaman Step 2: Find
     st.markdown("<br><br>", unsafe_allow_html=True)  # Tambahkan jarak vertikal
     col1, col2, col3 = st.columns([3, 4, 3])  # Buat kolom untuk pusatkan tombol
     with col2:  # Letakkan tombol di tengah
-        if st.button("Next: Step 3", key="next_to_step_3"):
-            st.session_state.page = '📚 Step 3: Grow'  # Mengubah halaman saat tombol diklik
+        if st.button("Next: Step 3", key="next_to_step_3", use_container_width=True, args=(), kwargs={'css_class': 'next-button'}):
+            st.session_state.page = '📚 Step 3: Grow'  # Ubah halaman di session state
 
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
@@ -667,4 +678,11 @@ elif page == '📚 Step 3: Grow':
                     st.session_state.course_page += 1
 
 if __name__ == "__main__":
-    pass
+    if 'page' in st.session_state:
+        page = st.session_state.page
+        if page == '💼 Step 2: Find':
+            st.experimental_rerun()  # Merestart Streamlit untuk pindah ke halaman yang benar
+        elif page == '📚 Step 3: Grow':
+            st.experimental_rerun()
+    else:
+        st.session_state.page = '🏢 Home'
