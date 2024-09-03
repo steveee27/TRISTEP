@@ -83,7 +83,6 @@ def change_page(direction):
         st.session_state.page = pages[current_index + 1]
     elif direction == 'prev' and current_index > 0:
         st.session_state.page = pages[current_index - 1]
-    st.experimental_rerun()
 
 def convert_to_yearly(salary, pay_period):
     try:
@@ -344,7 +343,6 @@ st.sidebar.markdown("---")
 selected_page = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow'))
 if selected_page != st.session_state.page:
     st.session_state.page = selected_page
-    st.experimental_rerun()
 st.sidebar.markdown("---")
 st.sidebar.markdown("© 2024 TriStep 🚀")
 st.sidebar.markdown("Created By M-Tree")
