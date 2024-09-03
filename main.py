@@ -452,7 +452,7 @@ if page == '🏢 Home':
     with col2:
         if st.button("Start Your Journey Here!", key="start_journey"):
             st.session_state.page = '📊 Step 1: Explore'
-            st.experimental_rerun()  # Refresh halaman untuk berpindah
+            st.experimental_set_query_params()  # Refresh halaman untuk berpindah
 
 elif page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
@@ -505,7 +505,7 @@ elif page == '📊 Step 1: Explore':
     with col2:  # Letakkan tombol di tengah
         if st.button("Next: Step 2", key="next_to_step_2"):
             st.session_state.page = '💼 Step 2: Find'  # Mengubah halaman saat tombol diklik
-            st.experimental_rerun()  # Refresh halaman untuk berpindah
+            st.experimental_set_query_params()  # Refresh halaman untuk berpindah
 
 elif page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
@@ -598,7 +598,7 @@ elif page == '💼 Step 2: Find':
     with col2:  # Letakkan tombol di tengah
         if st.button("Next: Step 3", key="next_to_step_3"):
             st.session_state.page = '📚 Step 3: Grow'  # Mengubah halaman saat tombol diklik
-            st.experimental_rerun()  # Refresh halaman untuk berpindah
+            st.experimental_set_query_params()  # Refresh halaman untuk berpindah
 
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
