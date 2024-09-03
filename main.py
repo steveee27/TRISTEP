@@ -77,10 +77,13 @@ def imdb_score(df, q=0.95):
     return df
 
 def change_page(direction):
-    if 'page' in st.session_state:
-        st.session_state.page += direction
-    else:
-        st.session_state.page = 0
+    pages = ['🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow']
+    current_index = pages.index(st.session_state.page)
+    if direction == 'next' and current_index < len(pages) - 1:
+        st.session_state.page = pages[current_index + 1]
+    elif direction == 'prev' and current_index > 0:
+        st.session_state.page = pages[current_index - 1]
+    st.experimental_rerun()
 
 def convert_to_yearly(salary, pay_period):
     try:
@@ -330,31 +333,21 @@ st.markdown(
 )
 
 if 'page' not in st.session_state:
-    st.session_state.page = 'dashboard'
+    st.session_state.page = '🏢 Home'
+
+page = st.session_state.page
 
 st.sidebar.title("🧭 Navigation")
 st.sidebar.markdown("---")
 st.sidebar.image(image1_path, use_column_width=True)
 st.sidebar.markdown("---")
-page = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow'))
+selected_page = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow'))
+if selected_page != st.session_state.page:
+    st.session_state.page = selected_page
+    st.experimental_rerun()
 st.sidebar.markdown("---")
 st.sidebar.markdown("© 2024 TriStep 🚀")
 st.sidebar.markdown("Created By M-Tree")
-
-if 'previous_page' not in st.session_state:
-    st.session_state.previous_page = None
-
-current_page = page
-
-if current_page != st.session_state.previous_page:
-    if 'job_recommendations' in st.session_state:
-        st.session_state.job_recommendations = None
-        st.session_state.job_page = 0
-    if 'course_recommendations' in st.session_state:
-        st.session_state.course_recommendations = None
-        st.session_state.course_page = 0
-
-st.session_state.previous_page = current_page
 
 if page == '🏢 Home':
     col1, col2, col3 = st.columns(3)
@@ -368,7 +361,6 @@ if page == '🏢 Home':
         st.write(' ')
     st.title("🏢 About TriStep")
    
-
     st.markdown("<div class='section'>", unsafe_allow_html=True)
     st.header("Welcome to TriStep")
     st.write(
@@ -376,7 +368,6 @@ if page == '🏢 Home':
         "We're dedicated to empowering individuals with the tools and resources needed to "
         "enhance their skills, expand their knowledge, and unlock their full potential in their career journeys."
     )
-    
     
     st.write(
         "The name 'TriStep' embodies our core philosophy of growth through three essential steps:"
@@ -436,6 +427,11 @@ if page == '🏢 Home':
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
+    col1, col2 = st.columns([5, 1])
+    with col2:
+        if st.button("Next ➡️", key='home_next'):
+            change_page('next')
+
 elif page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
     html_string = """
@@ -480,6 +476,15 @@ elif page == '📊 Step 1: Explore':
     </script>
     """
     st.components.v1.html(html_string, width=900, height=1827)
+
+    col1, col2, col3 = st.columns([1, 4, 1])
+    with col1:
+        if st.button("⬅️ Prev", key='explore_prev'):
+            change_page('prev')
+    with col3:
+        if st.button("Next ➡️", key='explore_next'):
+            change_page('next')
+
 elif page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
 
@@ -564,6 +569,14 @@ elif page == '💼 Step 2: Find':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='job_next'):
                     st.session_state.job_page += 1
+
+    col1, col2, col3 = st.columns([1, 4, 1])
+    with col1:
+        if st.button("⬅️ Prev", key='find_prev'):
+            change_page('prev')
+    with col3:
+        if st.button("Next ➡️", key='find_next'):
+            change_page('next')
                 
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
@@ -586,7 +599,7 @@ elif page == '📚 Step 3: Grow':
 
     user_input = st.text_area("🔍 Prompt skills or topics you'd like to learn:", 
                           height=150,
-                          help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
+                          help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
 
     if st.button("🚀 Get Course Recommendations", key="get_course_recommendations"):
         recommendations = recommend_course(user_input, df_course, vectorizer_course, tfidf_matrix_course)
@@ -650,6 +663,11 @@ elif page == '📚 Step 3: Grow':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='course_next'):
                     st.session_state.course_page += 1
+
+    col1, col2 = st.columns([1, 5])
+    with col1:
+        if st.button("⬅️ Prev", key='grow_prev'):
+            change_page('prev')
 
 if __name__ == "__main__":
     pass
