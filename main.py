@@ -77,12 +77,10 @@ def imdb_score(df, q=0.95):
     return df
 
 def change_page(direction):
-    pages = ['🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow']
-    current_index = pages.index(st.session_state.page)
-    if direction == 'next' and current_index < len(pages) - 1:
-        st.session_state.page = pages[current_index + 1]
-    elif direction == 'prev' and current_index > 0:
-        st.session_state.page = pages[current_index - 1]
+    if 'page' in st.session_state:
+        st.session_state.page += direction
+    else:
+        st.session_state.page = 0
 
 def convert_to_yearly(salary, pay_period):
     try:
@@ -326,6 +324,14 @@ st.markdown(
         visibility: visible;
         opacity: 1;
     }
+    .big-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 200px;
+        height: 50px;
+        font-size: 18px;
+    }
     </style>
     """, 
     unsafe_allow_html=True
@@ -334,21 +340,21 @@ st.markdown(
 if 'page' not in st.session_state:
     st.session_state.page = '🏢 Home'
 
-page = st.session_state.page
-
 st.sidebar.title("🧭 Navigation")
 st.sidebar.markdown("---")
 st.sidebar.image(image1_path, use_column_width=True)
 st.sidebar.markdown("---")
-pages = ['🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow']
-for page in pages:
-    if st.sidebar.button(page, key=f"sidebar_{page}"):
-        st.session_state.page = page
+
+page_selection = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow'))
+
+if page_selection != st.session_state.page:
+    st.session_state.page = page_selection
+
 st.sidebar.markdown("---")
 st.sidebar.markdown("© 2024 TriStep 🚀")
 st.sidebar.markdown("Created By M-Tree")
 
-if page == '🏢 Home':
+if st.session_state.page == '🏢 Home':
     col1, col2, col3 = st.columns(3)
     with col1:
         st.write(' ')
@@ -360,6 +366,7 @@ if page == '🏢 Home':
         st.write(' ')
     st.title("🏢 About TriStep")
    
+
     st.markdown("<div class='section'>", unsafe_allow_html=True)
     st.header("Welcome to TriStep")
     st.write(
@@ -367,6 +374,7 @@ if page == '🏢 Home':
         "We're dedicated to empowering individuals with the tools and resources needed to "
         "enhance their skills, expand their knowledge, and unlock their full potential in their career journeys."
     )
+    
     
     st.write(
         "The name 'TriStep' embodies our core philosophy of growth through three essential steps:"
@@ -426,12 +434,11 @@ if page == '🏢 Home':
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
-    col1, col2 = st.columns([5, 1])
-    with col2:
-        if st.button("Next ➡️", key='home_next'):
-            change_page('next')
+    next_page = st.button("Next: Step 1 ➡️", key="home_next", help="Go to Step 1: Explore")
+    if next_page:
+        st.session_state.page = '📊 Step 1: Explore'
 
-elif page == '📊 Step 1: Explore':
+elif st.session_state.page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
     html_string = """
         <div class='tableauPlaceholder' id='viz1724606542164' style='position: relative'>
@@ -476,15 +483,11 @@ elif page == '📊 Step 1: Explore':
     """
     st.components.v1.html(html_string, width=900, height=1827)
 
-    col1, col2, col3 = st.columns([1, 4, 1])
-    with col1:
-        if st.button("⬅️ Prev", key='explore_prev'):
-            change_page('prev')
-    with col3:
-        if st.button("Next ➡️", key='explore_next'):
-            change_page('next')
-
-elif page == '💼 Step 2: Find':
+    next_page = st.button("Next: Step 2 ➡️", key="explore_next", help="Go to Step 2: Find")
+    if next_page:
+        st.session_state.page = '💼 Step 2: Find'
+        
+elif st.session_state.page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
 
     st.subheader('🎚️ Experience Level')
@@ -569,15 +572,11 @@ elif page == '💼 Step 2: Find':
                 if st.button("Next ➡️", key='job_next'):
                     st.session_state.job_page += 1
 
-    col1, col2, col3 = st.columns([1, 4, 1])
-    with col1:
-        if st.button("⬅️ Prev", key='find_prev'):
-            change_page('prev')
-    with col3:
-        if st.button("Next ➡️", key='find_next'):
-            change_page('next')
-                
-elif page == '📚 Step 3: Grow':
+    next_page = st.button("Next: Step 3 ➡️", key="find_next", help="Go to Step 3: Grow")
+    if next_page:
+        st.session_state.page = '📚 Step 3: Grow'
+        
+elif st.session_state.page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
     
     st.subheader('🌐 Sites')
@@ -598,7 +597,7 @@ elif page == '📚 Step 3: Grow':
 
     user_input = st.text_area("🔍 Prompt skills or topics you'd like to learn:", 
                           height=150,
-                          help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
+                          help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
 
     if st.button("🚀 Get Course Recommendations", key="get_course_recommendations"):
         recommendations = recommend_course(user_input, df_course, vectorizer_course, tfidf_matrix_course)
@@ -662,11 +661,6 @@ elif page == '📚 Step 3: Grow':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='course_next'):
                     st.session_state.course_page += 1
-
-    col1, col2 = st.columns([1, 5])
-    with col1:
-        if st.button("⬅️ Prev", key='grow_prev'):
-            change_page('prev')
 
 if __name__ == "__main__":
     pass
