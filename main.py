@@ -184,6 +184,7 @@ df_course, vectorizer_course, tfidf_matrix_course = load_course_data()
 
 image1_path, image2_path = download_images()
 
+# CSS Customization
 st.markdown(
     """
     <style>
@@ -492,13 +493,14 @@ elif page == '📊 Step 1: Explore':
     """
     st.components.v1.html(html_string, width=900, height=1827)
 
-        # Di halaman Step 1: Explore
+    # Tombol "Next: Step 2" di halaman "Step 1: Explore"
     st.markdown("<br><br>", unsafe_allow_html=True)  # Tambahkan jarak vertikal
     col1, col2, col3 = st.columns([3, 4, 3])  # Buat kolom untuk pusatkan tombol
     with col2:  # Letakkan tombol di tengah
-        if st.button("Next: Step 2", key="next_to_step_2", use_container_width=True, args=(), kwargs={'css_class': 'next-button'}):
-            st.session_state.page = '💼 Step 2: Find'  # Ubah halaman di session state
-            
+        if st.button("Next: Step 2", key="next_to_step_2"):
+            st.session_state.page = '💼 Step 2: Find'  # Mengubah halaman saat tombol diklik
+            st.experimental_rerun()  # Refresh halaman untuk berpindah
+
 elif page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
 
@@ -584,12 +586,13 @@ elif page == '💼 Step 2: Find':
                 if st.button("Next ➡️", key='job_next'):
                     st.session_state.job_page += 1
 
-    # Di halaman Step 2: Find
+    # Tombol "Next: Step 3" di halaman "Step 2: Find"
     st.markdown("<br><br>", unsafe_allow_html=True)  # Tambahkan jarak vertikal
     col1, col2, col3 = st.columns([3, 4, 3])  # Buat kolom untuk pusatkan tombol
     with col2:  # Letakkan tombol di tengah
-        if st.button("Next: Step 3", key="next_to_step_3", use_container_width=True, args=(), kwargs={'css_class': 'next-button'}):
-            st.session_state.page = '📚 Step 3: Grow'  # Ubah halaman di session state
+        if st.button("Next: Step 3", key="next_to_step_3"):
+            st.session_state.page = '📚 Step 3: Grow'  # Mengubah halaman saat tombol diklik
+            st.experimental_rerun()  # Refresh halaman untuk berpindah
 
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
@@ -678,11 +681,4 @@ elif page == '📚 Step 3: Grow':
                     st.session_state.course_page += 1
 
 if __name__ == "__main__":
-    if 'page' in st.session_state:
-        page = st.session_state.page
-        if page == '💼 Step 2: Find':
-            st.experimental_rerun()  # Merestart Streamlit untuk pindah ke halaman yang benar
-        elif page == '📚 Step 3: Grow':
-            st.experimental_rerun()
-    else:
-        st.session_state.page = '🏢 Home'
+    pass
