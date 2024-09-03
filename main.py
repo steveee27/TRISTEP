@@ -586,7 +586,7 @@ elif st.session_state.page == '💼 Step 2: Find':
     if st.button("Next: Step 3 ➡️", key="find_next", help="Go to Step 3: Grow"):
         st.session_state.page = '📚 Step 3: Grow'
         
-elif page == '📚 Step 3: Grow':
+elif st.session_state.page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
     
     st.subheader('🌐 Sites')
