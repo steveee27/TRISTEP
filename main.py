@@ -169,11 +169,11 @@ def load_course_data():
 def download_images():
     url1 = 'https://drive.google.com/uc?id=1lhfFczKatGDEuq3ux2y-AqfPpVC96UZ9'
     output1 = 'Minimalist_Black_and_White_Blank_Paper_Document_1.png'
-    gdown.download(url1, output, quiet=False)
+    gdown.download(url1, output1, quiet=False)
 
     url2 = 'https://drive.google.com/uc?id=1hbpQIE7Ez0Z4k1Sfq8FSO80_5HRujdjP'
     output2 = 'nobg2.png'
-    gdown.download(url2, output, quiet=False)
+    gdown.download(url2, output2, quiet=False)
 
     return output1, output2
 
