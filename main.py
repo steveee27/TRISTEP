@@ -169,11 +169,11 @@ def load_course_data():
 def download_images():
     url1 = 'https://drive.google.com/uc?id=1lhfFczKatGDEuq3ux2y-AqfPpVC96UZ9'
     output1 = 'Minimalist_Black_and_White_Blank_Paper_Document_1.png'
-    gdown.download(url1, output1, quiet=False)
+    gdown.download(url1, output, quiet=False)
 
     url2 = 'https://drive.google.com/uc?id=1hbpQIE7Ez0Z4k1Sfq8FSO80_5HRujdjP'
     output2 = 'nobg2.png'
-    gdown.download(url2, output2, quiet=False)
+    gdown.download(url2, output, quiet=False)
 
     return output1, output2
 
@@ -380,7 +380,6 @@ if page == '🏢 Home':
         st.write(' ')
     st.title("🏢 About TriStep")
    
-
     st.markdown("<div class='section'>", unsafe_allow_html=True)
     st.header("Welcome to TriStep")
     st.write(
@@ -388,7 +387,6 @@ if page == '🏢 Home':
         "We're dedicated to empowering individuals with the tools and resources needed to "
         "enhance their skills, expand their knowledge, and unlock their full potential in their career journeys."
     )
-    
     
     st.write(
         "The name 'TriStep' embodies our core philosophy of growth through three essential steps:"
@@ -447,6 +445,14 @@ if page == '🏢 Home':
         "Your journey to personal and career growth starts here!"
     )
     st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Tombol "Start Your Journey Here!" di halaman "Home"
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([3, 4, 3])
+    with col2:
+        if st.button("Start Your Journey Here!", key="start_journey"):
+            st.session_state.page = '📊 Step 1: Explore'
+            st.experimental_rerun()  # Refresh halaman untuk berpindah
 
 elif page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
