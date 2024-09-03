@@ -324,37 +324,39 @@ st.markdown(
         visibility: visible;
         opacity: 1;
     }
-    .big-button {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 200px;
-        height: 50px;
-        font-size: 18px;
-    }
     </style>
     """, 
     unsafe_allow_html=True
 )
 
 if 'page' not in st.session_state:
-    st.session_state.page = '🏢 Home'
+    st.session_state.page = 'dashboard'
 
 st.sidebar.title("🧭 Navigation")
 st.sidebar.markdown("---")
 st.sidebar.image(image1_path, use_column_width=True)
 st.sidebar.markdown("---")
-
-page_selection = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow'))
-
-if page_selection != st.session_state.page:
-    st.session_state.page = page_selection
-
+page = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow'))
 st.sidebar.markdown("---")
 st.sidebar.markdown("© 2024 TriStep 🚀")
 st.sidebar.markdown("Created By M-Tree")
 
-if st.session_state.page == '🏢 Home':
+if 'previous_page' not in st.session_state:
+    st.session_state.previous_page = None
+
+current_page = page
+
+if current_page != st.session_state.previous_page:
+    if 'job_recommendations' in st.session_state:
+        st.session_state.job_recommendations = None
+        st.session_state.job_page = 0
+    if 'course_recommendations' in st.session_state:
+        st.session_state.course_recommendations = None
+        st.session_state.course_page = 0
+
+st.session_state.previous_page = current_page
+
+if page == '🏢 Home':
     col1, col2, col3 = st.columns(3)
     with col1:
         st.write(' ')
@@ -434,11 +436,7 @@ if st.session_state.page == '🏢 Home':
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
-    next_page = st.button("Next: Step 1 ➡️", key="home_next", help="Go to Step 1: Explore")
-    if next_page:
-        st.session_state.page = '📊 Step 1: Explore'
-
-elif st.session_state.page == '📊 Step 1: Explore':
+elif page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
     html_string = """
         <div class='tableauPlaceholder' id='viz1724606542164' style='position: relative'>
@@ -482,12 +480,7 @@ elif st.session_state.page == '📊 Step 1: Explore':
     </script>
     """
     st.components.v1.html(html_string, width=900, height=1827)
-
-    next_page = st.button("Next: Step 2 ➡️", key="explore_next", help="Go to Step 2: Find")
-    if next_page:
-        st.session_state.page = '💼 Step 2: Find'
-        
-elif st.session_state.page == '💼 Step 2: Find':
+elif page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
 
     st.subheader('🎚️ Experience Level')
@@ -571,12 +564,8 @@ elif st.session_state.page == '💼 Step 2: Find':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='job_next'):
                     st.session_state.job_page += 1
-
-    next_page = st.button("Next: Step 3 ➡️", key="find_next", help="Go to Step 3: Grow")
-    if next_page:
-        st.session_state.page = '📚 Step 3: Grow'
-        
-elif st.session_state.page == '📚 Step 3: Grow':
+                
+elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
     
     st.subheader('🌐 Sites')
