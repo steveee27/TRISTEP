@@ -480,6 +480,14 @@ elif page == '📊 Step 1: Explore':
     </script>
     """
     st.components.v1.html(html_string, width=900, height=1827)
+
+    # Tombol "Next: Step 2" di halaman "Step 1: Explore"
+    st.markdown("<br><br>", unsafe_allow_html=True)  # Tambahkan jarak vertikal
+    col1, col2, col3 = st.columns([3, 4, 3])  # Buat kolom untuk pusatkan tombol
+    with col2:  # Letakkan tombol di tengah
+        if st.button("Next: Step 2", key="next_to_step_2"):
+            st.session_state.page = '💼 Step 2: Find'  # Mengubah halaman saat tombol diklik
+
 elif page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
 
@@ -564,7 +572,14 @@ elif page == '💼 Step 2: Find':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='job_next'):
                     st.session_state.job_page += 1
-                
+
+    # Tombol "Next: Step 3" di halaman "Step 2: Find"
+    st.markdown("<br><br>", unsafe_allow_html=True)  # Tambahkan jarak vertikal
+    col1, col2, col3 = st.columns([3, 4, 3])  # Buat kolom untuk pusatkan tombol
+    with col2:  # Letakkan tombol di tengah
+        if st.button("Next: Step 3", key="next_to_step_3"):
+            st.session_state.page = '📚 Step 3: Grow'  # Mengubah halaman saat tombol diklik
+
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
     
