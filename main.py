@@ -24,12 +24,12 @@ def add_navigation_buttons():
         if st.session_state.page != '🏢 Home':
             if st.button("⬅️ Prev"):
                 st.session_state.page = navigate_page('prev')
-                st.experimental_rerun()
+                st.rerun()
     with col3:
         if st.session_state.page != '📚 Step 3: Grow':
             if st.button("Next ➡️"):
                 st.session_state.page = navigate_page('next')
-                st.experimental_rerun()
+                st.rerun()
                 
 def preprocess_text_simple(text):
     if pd.isna(text):
