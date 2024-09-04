@@ -360,7 +360,8 @@ st.sidebar.markdown("---")
 if 'page' not in st.session_state:
     st.session_state.page = '🏢 Home'
 page = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow'))
-st.session_state.page = pagest.sidebar.markdown("---")
+st.session_state.page = page
+st.sidebar.markdown("---")
 st.sidebar.markdown("© 2024 TriStep 🚀")
 st.sidebar.markdown("Created By M-Tree")
 
