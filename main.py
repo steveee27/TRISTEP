@@ -9,28 +9,7 @@ import time
 import gdown
 
 st.set_page_config(page_title="TriStep - Career and Learning Recommendation System", page_icon="🚀", layout="wide")
-def navigate_page(direction):
-    pages = ['🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow']
-    current_index = pages.index(st.session_state.page)
-    if direction == 'next' and current_index < len(pages) - 1:
-        return pages[current_index + 1]
-    elif direction == 'prev' and current_index > 0:
-        return pages[current_index - 1]
-    return st.session_state.page
 
-def add_navigation_buttons():
-    col1, col2, col3 = st.columns([1, 6, 1])
-    with col1:
-        if st.session_state.page != '🏢 Home':
-            if st.button("⬅️ Prev", key=f"prev_{st.session_state.page}"):
-                st.session_state.page = navigate_page('prev')
-                st.rerun()
-    with col3:
-        if st.session_state.page != '📚 Step 3: Grow':
-            if st.button("Next ➡️", key=f"next_{st.session_state.page}"):
-                st.session_state.page = navigate_page('next')
-                st.rerun()
-                
 def preprocess_text_simple(text):
     if pd.isna(text):
         return ""
@@ -357,10 +336,7 @@ st.sidebar.title("🧭 Navigation")
 st.sidebar.markdown("---")
 st.sidebar.image(image1_path, use_column_width=True)
 st.sidebar.markdown("---")
-if 'page' not in st.session_state:
-    st.session_state.page = '🏢 Home'
 page = st.sidebar.radio("Go to", ('🏢 Home', '📊 Step 1: Explore', '💼 Step 2: Find', '📚 Step 3: Grow'))
-st.session_state.page = page
 st.sidebar.markdown("---")
 st.sidebar.markdown("© 2024 TriStep 🚀")
 st.sidebar.markdown("Created By M-Tree")
@@ -459,7 +435,6 @@ if page == '🏢 Home':
         "Your journey to personal and career growth starts here!"
     )
     st.markdown("</div>", unsafe_allow_html=True)
-    add_navigation_buttons()
 
 elif page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
@@ -505,7 +480,6 @@ elif page == '📊 Step 1: Explore':
     </script>
     """
     st.components.v1.html(html_string, width=900, height=1827)
-    add_navigation_buttons()
 elif page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
 
@@ -590,7 +564,7 @@ elif page == '💼 Step 2: Find':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='job_next'):
                     st.session_state.job_page += 1
-    add_navigation_buttons()    
+                
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
     
@@ -676,6 +650,6 @@ elif page == '📚 Step 3: Grow':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='course_next'):
                     st.session_state.course_page += 1
-    add_navigation_buttons()
+
 if __name__ == "__main__":
     pass
