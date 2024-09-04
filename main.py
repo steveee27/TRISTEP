@@ -22,12 +22,14 @@ def add_navigation_buttons():
     col1, col2, col3 = st.columns([1, 6, 1])
     with col1:
         if st.session_state.page != '🏢 Home':
-            if st.button("⬅️ Prev"):
+            if st.button("⬅️ Prev", key=f"prev_{st.session_state.page}"):
                 st.session_state.page = navigate_page('prev')
+                st.rerun()
     with col3:
         if st.session_state.page != '📚 Step 3: Grow':
-            if st.button("Next ➡️"):
+            if st.button("Next ➡️", key=f"next_{st.session_state.page}"):
                 st.session_state.page = navigate_page('next')
+                st.rerun()
                 
 def preprocess_text_simple(text):
     if pd.isna(text):
@@ -588,7 +590,7 @@ elif page == '💼 Step 2: Find':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='job_next'):
                     st.session_state.job_page += 1
-        add_navigation_buttons()    
+    add_navigation_buttons()    
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
     
@@ -674,6 +676,6 @@ elif page == '📚 Step 3: Grow':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='course_next'):
                     st.session_state.course_page += 1
-        add_navigation_buttons()
+    add_navigation_buttons()
 if __name__ == "__main__":
     pass
