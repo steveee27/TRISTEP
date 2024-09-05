@@ -16,6 +16,7 @@ For a guided tour on how to use the platform, check out our live demo video: [Wa
 - [System Requirements](#system-requirements)
 - [Installation](#installation)
 - [Usage](#usage)
+- [FAQ](#FAQ)
 - [Contributors](#contributors)
 - [License](#license)
 
@@ -92,6 +93,12 @@ cd streamlit_app
 streamlit run app.py
 ```
 Access the TRISTEP platform online at: [TRISTEP Live](https://tristep.streamlit.app/)
+
+## FAQ
+
+Why am I getting an error when trying to run my Streamlit app?
+
+Your issue is most likely happening because Streamlit needs to be rebooted regularly. Sometimes the app runs out of memory or goes into sleep mode after being idle for a while. For assistance with rebooting, feel free to contact TriStep Company via email at TriStepcompany@gmail.com or through WhatsApp at 085106378743.
 
 ## Contributors
 1. [Steve Marcello Liem](https://github.com/steveee27)
