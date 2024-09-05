@@ -98,7 +98,7 @@ Access the TRISTEP platform online at: [TRISTEP Live](https://tristep.streamlit.
 
 Why am I getting an error when trying to run my Streamlit app?
 
-Your issue is most likely happening because Streamlit needs to be rebooted regularly. Sometimes the app runs out of memory or goes into sleep mode after being idle for a while. For assistance with rebooting, feel free to contact TriStep Company via email at TriStepcompany@gmail.com or through WhatsApp at 085106378743.
+Your issue is most likely happening because Streamlit needs to be rebooted regularly. This can happen when the app runs out of memory or goes into sleep mode after being idle for a while, especially since we are not using the premium version. For assistance with rebooting, feel free to contact TriStep Company via email at TriStepcompany@gmail.com or through WhatsApp at 085106378743.
 
 ## Contributors
 1. [Steve Marcello Liem](https://github.com/steveee27)
