@@ -14,7 +14,6 @@ def change_page(direction):
     current_index = pages.index(st.session_state.page)
     new_index = (current_index + direction) % len(pages)
     st.session_state.page = pages[new_index]
-
 def add_navigation_buttons():
     col1, col2, col3 = st.columns([1, 6, 1])
     with col1:
@@ -23,7 +22,6 @@ def add_navigation_buttons():
     with col3:
         if st.button("Next Page ➡️"):
             change_page(1)
-
 
 def preprocess_text_simple(text):
     if pd.isna(text):
