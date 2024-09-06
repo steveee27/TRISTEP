@@ -1,10 +1,10 @@
--- assets
+-- assets, https://drive.google.com/drive/folders/1oSO4an2REZ9uGixCRfXM7-c_yfsA3jOS?usp=sharing
     -- background
     -- logo
     -- tagline
--- preprocessed
+-- preprocessed, https://drive.google.com/drive/folders/1Lt7q330BLH2eTq-_ne8KjEu5Wavfd4--?usp=sharing
     -- preprocessed_linkedin
--- source
+-- source, https://drive.google.com/drive/folders/1cOa0wsCJxAL6tlsYZJQ4EFx_vyM9Vaog?usp=sharing
     -- linkedin
         -- benefits
         -- companies
@@ -16,6 +16,6 @@
         -- job_skills
     -- online_course
         -- Online_Courses
--- test_cases
+-- test_cases, https://drive.google.com/drive/folders/1d-AjVZZe2I5eHfdldSy3vQvhFEMWNo7X?usp=sharing
     -- test_case_course
     -- test_case_job
