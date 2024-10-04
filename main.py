@@ -5,9 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import string
 import streamlit as st
 import re
-import time
 import gdown
-
 st.set_page_config(page_title="TriStep - Career and Learning Recommendation System", page_icon="🚀", layout="wide")
 
 def preprocess_text_simple(text):
@@ -40,74 +38,51 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, w
     
     cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix[filtered_df.index]).flatten()
     
+    # Filter recommendations with cosine similarity > 0 and sort
+    above_zero = cosine_similarities > 0
+    if not any(above_zero):
+        return None
+
+    top_job_indices = np.where(above_zero)[0]
+    
+    top_job_indices = top_job_indices[np.argsort(cosine_similarities[top_job_indices])[::-1]]
+    
+    top_jobs = filtered_df.iloc[top_job_indices].copy()
+    top_jobs.reset_index(drop=True, inplace=True)
+    
+    top_jobs['cosine_similarity'] = cosine_similarities[top_job_indices]
+    
+    return top_jobs
+
+def recommend_course(user_input, df, vectorizer, tfidf_matrix):
+    user_input_processed = preprocess_text_simple(user_input)
+    user_tfidf = vectorizer.transform([user_input_processed])
+    
+    cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
+    
     above_zero = cosine_similarities > 0
     if not any(above_zero):
         return None
 
     threshold = np.percentile(cosine_similarities[above_zero], 95)
-    
+
     above_threshold = cosine_similarities >= threshold
     top_course_indices = np.where(above_threshold)[0]
-    
+
     top_course_indices = top_course_indices[np.argsort(cosine_similarities[top_course_indices])[::-1]]
-    
-    top_courses = filtered_df.iloc[top_course_indices].copy()
+
+    top_courses = df.iloc[top_course_indices].copy()
     top_courses.reset_index(drop=True, inplace=True)
     
     top_courses['cosine_similarity'] = cosine_similarities[top_course_indices]
-    
+
     return top_courses
-
-def recommend_course(user_input, df, vectorizer, tfidf_matrix):
-    start_time = time.time()
-    user_input_processed = preprocess_text_simple(user_input)
-    user_tfidf = vectorizer.transform([user_input_processed])
-    cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
-    top_course_indices = cosine_similarities.argsort()[::-1]
-    recommendation_time = time.time() - start_time
-    recommendations = df.iloc[top_course_indices].copy()
-    recommendations['cosine_similarity'] = cosine_similarities[top_course_indices]
-    return recommendations
-
-def imdb_score(df, q=0.95):
-    df = df.copy()
-    m = df['Number of viewers'].quantile(q)
-    c = (df['Rating'] * df['Number of viewers']).sum() / df['Number of viewers'].sum()
-    df["score"] = df.apply(lambda x: (x.Rating * x['Number of viewers'] + c*m) / (x['Number of viewers'] + m), axis=1)
-    return df
-
-def change_page(direction):
-    if 'page' in st.session_state:
-        st.session_state.page += direction
-    else:
-        st.session_state.page = 0
-
-def convert_to_yearly(salary, pay_period):
-    try:
-        salary = float(salary)
-        
-        if pay_period == 'YEARLY':
-            return salary
-        elif pay_period == 'MONTHLY':
-            return salary * 12
-        elif pay_period == 'HOURLY':
-            return salary * 40 * 52
-        else:
-            return 'Unknown'
-    except (ValueError, TypeError):
-        return 'Unknown'
-
-def preprocess_salary(df):
-    df['min_salary'] = df.apply(lambda x: convert_to_yearly(x['min_salary'], x['pay_period']), axis=1)
-    df['max_salary'] = df.apply(lambda x: convert_to_yearly(x['max_salary'], x['pay_period']), axis=1)
-    return df
 
 @st.cache_data
 def load_job_data():
-    url = 'https://drive.google.com/uc?export=download&id=1fBOB-dm_BJasoJfA_CwUFMBINwgvWPeW'
-    output = 'linkedin.csv'
-    gdown.download(url, output, quiet=False)
-    df_job = pd.read_csv(output)
+    csv_url = 'https://docs.google.com/spreadsheets/d/1huKbxP4W5c5sBWAQ5LzerhdId6TR9glCRFKn7DNOKEE/export?format=csv&gid=1980208131'
+    df_job = pd.read_csv(csv_url, on_bad_lines='skip', engine='python')
+    
     df_job['Combined'] = df_job['title'].fillna('') + ' ' + df_job['description_x'].fillna('') + ' ' + df_job['skills_desc'].fillna('')
     df_job['Combined'] = df_job['Combined'].apply(preprocess_text_simple)
     df_job['title'] = df_job['title'].apply(remove_asterisks)
@@ -117,18 +92,9 @@ def load_job_data():
 
 @st.cache_data
 def load_course_data():
-    url = 'https://drive.google.com/uc?id=1tnpLFGqbmGRU_EDxUpuMCupx4-HJxEqF'
-    output = 'Online_Courses.csv'
-    gdown.download(url, output, quiet=False)
-
-    df_course = pd.read_csv(output)
-    df_course.drop(columns=['Unnamed: 0','Program Type', 'Courses', 'Level', 'Number of Reviews',
-           'Unique Projects', 'Prequisites', 'What you learn', 'Related Programs',
-           'Monthly access', '6-Month access', '4-Month access', '3-Month access',
-           '5-Month access', '2-Month access', 'School', 'Topics related to CRM',
-           'ExpertTracks', 'FAQs', 'Course Title', 'Course URL',
-           'Course Short Intro', 'Weekly study', 'Premium course',
-           "What's include", 'Rank', 'Created by', 'Program'], inplace=True)
+    csv_url = 'https://docs.google.com/spreadsheets/d/1PM_ifqhHQbvVau26xH2rU7xEw8ib1t2D6s_eDRPzJVI/export?format=csv&gid=2031125993'
+    df_course = pd.read_csv(csv_url)
+    
     df_course = df_course.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
     df_course = df_course.drop_duplicates(subset=['Title', 'Short Intro'])
     translations = {
@@ -164,7 +130,7 @@ def load_course_data():
     vectorizer_course = TfidfVectorizer(stop_words='english')
     tfidf_matrix_course = vectorizer_course.fit_transform(df_course['combined'])
     return df_course, vectorizer_course, tfidf_matrix_course
-
+    
 @st.cache_data
 def download_images():
     url1 = 'https://drive.google.com/uc?id=1lhfFczKatGDEuq3ux2y-AqfPpVC96UZ9'
@@ -178,7 +144,6 @@ def download_images():
     return output1, output2
 
 df_job, vectorizer_job, tfidf_matrix_job = load_job_data()
-df_job = preprocess_salary(df_job)
 df_job.fillna("Unknown", inplace=True)
 df_course, vectorizer_course, tfidf_matrix_course = load_course_data()
 
@@ -213,6 +178,14 @@ st.markdown(
         width: 100% !important;
         height: 40px !important;
         white-space: nowrap !important;
+    }
+    .logo-link {
+    cursor: pointer;
+    text-align: center;
+    display: block;
+    }
+    .logo-link:hover {
+        opacity: 0.8;
     }
     .st-expander {
         border: 1px solid var(--secondary-background-color);
@@ -438,51 +411,69 @@ if page == '🏢 Home':
 
 elif page == '📊 Step 1: Explore':
     st.title("📊 Explore the Latest Job Trends")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.write(' ')
+    with col2:
+        st.image(image2_path)
+    with col3:
+        st.write(' ')
     html_string = """
-        <div class='tableauPlaceholder' id='viz1724606542164' style='position: relative'>
-        <noscript>
+        <div class='tableauPlaceholder' id='viz1727850105151' style='position: relative'>
+          <noscript>
             <a href='#'>
-                <img alt='Dashboard' src='https://public.tableau.com/static/images/Da/Dashboard_AIC_M-Tree_Explore/Dashboard/1_rss.png' style='border: none' />
+              <img alt='Dashboard' src='https://public.tableau.com/static/images/Jo/JobMarket_Dashboard/Dashboard/1_rss.png' style='border: none' />
             </a>
-        </noscript>
-        <object class='tableauViz' style='display:none;'>
+          </noscript>
+          <object class='tableauViz' style='display:none;'>
             <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
             <param name='embed_code_version' value='3' />
             <param name='site_root' value='' />
-            <param name='name' value='Dashboard_AIC_M-Tree_Explore/Dashboard' />
+            <param name='name' value='JobMarket_Dashboard/Dashboard' />
             <param name='tabs' value='no' />
             <param name='toolbar' value='yes' />
-            <param name='static_image' value='https://public.tableau.com/static/images/Da/Dashboard_AIC_M-Tree_Explore/Dashboard/1.png' />
+            <param name='static_image' value='https://public.tableau.com/static/images/Jo/JobMarket_Dashboard/Dashboard/1.png' />
             <param name='animate_transition' value='yes' />
             <param name='display_static_image' value='yes' />
             <param name='display_spinner' value='yes' />
             <param name='display_overlay' value='yes' />
             <param name='display_count' value='yes' />
             <param name='language' value='en-US' />
-        </object>
-    </div>
-    <script type='text/javascript'>
-        var divElement = document.getElementById('viz1724606542164');
-        var vizElement = divElement.getElementsByTagName('object')[0];
-        if (divElement.offsetWidth > 800) {
+          </object>
+        </div>
+        
+        <script type='text/javascript'>
+          var divElement = document.getElementById('viz1727850105151');
+          var vizElement = divElement.getElementsByTagName('object')[0];
+          
+          if (divElement.offsetWidth > 800) {
             vizElement.style.width = '900px';
             vizElement.style.height = '1827px';
-        } else if (divElement.offsetWidth > 500) {
+          } else if (divElement.offsetWidth > 500) {
             vizElement.style.width = '900px';
             vizElement.style.height = '1827px';
-        } else {
+          } else {
             vizElement.style.width = '100%';
             vizElement.style.height = '3877px';
-        }
-        var scriptElement = document.createElement('script');
-        scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
-        vizElement.parentNode.insertBefore(scriptElement, vizElement);
-    </script>
+          }
+        
+          var scriptElement = document.createElement('script');
+          scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+          vizElement.parentNode.insertBefore(scriptElement, vizElement);
+        </script>
+
     """
     st.components.v1.html(html_string, width=900, height=1827)
+
 elif page == '💼 Step 2: Find':
     st.title("💼 Find the Perfect Job for You")
-
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.write(' ')
+    with col2:
+        st.image(image2_path)
+    with col3:
+        st.write(' ')
     st.subheader('🎚️ Experience Level')
     experience_levels = [level for level in df_job['formatted_experience_level'].unique().tolist() if level != "Unknown"]
     selected_experience_levels = []
@@ -493,8 +484,7 @@ elif page == '💼 Step 2: Find':
                 selected_experience_levels.append(exp)
                 
     st.subheader('🏢 Work Type')
-    work_types = df_job['formatted_work_type'].unique().tolist()
-    work_types = [wt for wt in work_types if wt != "Other"]
+    work_types = [wt for wt in df_job['formatted_work_type'].unique().tolist() if wt != "Unknown" and wt != "Other"]
     selected_work_types = []
     cols = st.columns(2)
     for i, work in enumerate(work_types):
@@ -502,8 +492,12 @@ elif page == '💼 Step 2: Find':
             if st.checkbox(work, key=f"work_{work}"):
                 selected_work_types.append(work)
 
+    st.subheader('📍 Location')
+    unique_countries = ['All'] + sorted([country for country in df_job['country'].unique().tolist() if country != "Unknown"])
+    selected_country = st.selectbox('Choose a country', unique_countries)
+
     st.subheader('🔍 Company Name')
-    unique_companies = ['All'] + sorted(df_job['name'].unique().tolist())
+    unique_companies = ['All'] + sorted([company for company in df_job['name'].unique().tolist() if company != "Unknown"])
     name = st.selectbox('Select a company', unique_companies)
 
     user_input = st.text_area(
@@ -512,7 +506,12 @@ elif page == '💼 Step 2: Find':
     help="For better recommendations, provide detailed information such as:\n\n 'I am a Data Science graduate with a strong background in statistics, machine learning, and data analytics. I've completed projects like building predictive models for financial forecasting and creating recommendation systems for e-commerce. My skills include Python, R, SQL, and experience with big data tools like Hadoop and Spark. I'm passionate about using data to solve complex problems, particularly in finance and retail, and have earned certifications in Data Science and Big Data Analytics.'")
     
     if st.button("🚀 Get Job Insights", key="get_job_recommendations"):
-        recommendations = recommend_job(user_input, df_job, vectorizer_job, tfidf_matrix_job, selected_experience_levels, selected_work_types, name)
+        # Filter the job DataFrame based on the location selection
+        filtered_df = df_job.copy()
+        if selected_country != 'All':
+            filtered_df = filtered_df[filtered_df['country'] == selected_country]
+        
+        recommendations = recommend_job(user_input, filtered_df, vectorizer_job, tfidf_matrix_job, selected_experience_levels, selected_work_types, name)
         if recommendations is None or recommendations.empty:
             st.error("😕 No relevant jobs found matching your criteria. Please try adjusting your filters or providing more details in your career profile.")
             st.session_state.job_recommendations = None
@@ -532,25 +531,19 @@ elif page == '💼 Step 2: Find':
         for i, (_, row) in enumerate(recommendations.iloc[start_index:end_index].iterrows(), start=start_index + 1):
             st.markdown(f"#### {i}. {row['title']}")
             st.markdown(f"🏢 Company Name: {row['name']}")
-            st.markdown(f"📍 Location: {row['location']}")
+            st.markdown(f"📍 Country: {row['country']}")
+            st.markdown(f"📍 City: {row['city']}")
             st.markdown(f"[🔗 View Job Posting]({row['job_posting_url']})")
             with st.expander("📄 More Info"):
                 st.markdown(f"📝 Description: {row['description_x']}")
-
-                try:
-                    min_salary = int(float(row['min_salary'])) if row['min_salary'] != 'Unknown' else 'Unknown'
-                    min_salary_str = f"${min_salary:,}" if isinstance(min_salary, int) else 'Unknown'
-                except ValueError:
-                    min_salary_str = 'Unknown'
-                
-                try:
-                    max_salary = int(float(row['max_salary'])) if row['max_salary'] != 'Unknown' else 'Unknown'
-                    max_salary_str = f"${max_salary:,}" if isinstance(max_salary, int) else 'Unknown'
-                except ValueError:
-                    max_salary_str = 'Unknown'
-                
-                st.markdown(f"💰 Min Salary (Yearly): {min_salary_str}")
-                st.markdown(f"💵 Max Salary (Yearly): {max_salary_str}")
+                if row['min_salary'] == 'Unknown':
+                    st.markdown(f"💰 Min Salary (Yearly): {row['min_salary']}")
+                else:
+                    st.markdown(f"💰 Min Salary (Yearly): Rp{row['min_salary']}")
+                if row['max_salary'] == 'Unknown':
+                    st.markdown(f"💵 Max Salary (Yearly): {row['max_salary']}")
+                else:
+                    st.markdown(f"💵 Max Salary (Yearly): Rp{row['max_salary']}")
                 st.markdown(f"🕒 Work Type: {row['formatted_work_type']}")
                 st.markdown(f"🎓 Experience Level: {row['formatted_experience_level']}")       
             st.markdown("---")
@@ -564,10 +557,38 @@ elif page == '💼 Step 2: Find':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='job_next'):
                     st.session_state.job_page += 1
+
+     # Add the new button for adding a job
+    st.markdown("""
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfXOzq3CDsGvMu9UXZeq_6z9d1-QrT3KHSW5R3WPFHlRDDqVw/viewform" target="_blank">
+            <button style="
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 14px;
+                margin: 4px 2px;
+                cursor: pointer;
+                border-radius: 8px;
+                transition: background-color 0.3s;
+            ">
+                ➕ Contribute to Job Data
+            </button>
+        </a>
+    """, unsafe_allow_html=True)
                 
 elif page == '📚 Step 3: Grow':
     st.title('📚 Grow Through Course Choices')
-    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.write(' ')
+    with col2:
+        st.image(image2_path)
+    with col3:
+        st.write(' ')
     st.subheader('🌐 Sites')
     unique_sites = sorted(df_course['Site'].unique())
     col1, col2 = st.columns(2)
@@ -586,38 +607,34 @@ elif page == '📚 Step 3: Grow':
 
     user_input = st.text_area("🔍 Prompt skills or topics you'd like to learn:", 
                           height=150,
-                          help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
+                          help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
 
     if st.button("🚀 Get Course Recommendations", key="get_course_recommendations"):
         recommendations = recommend_course(user_input, df_course, vectorizer_course, tfidf_matrix_course)
         
-        percentile_threshold = 95
-        threshold_value = np.percentile(recommendations['cosine_similarity'], percentile_threshold)
-    
-        stage1 = recommendations[recommendations['cosine_similarity'] >= threshold_value]
-    
-        stage2 = imdb_score(stage1)
-        stage2['score'] = (stage2['score'] - stage2['score'].min()) / (stage2['score'].max() - stage2['score'].min())
-        stage2['cosine_similarity'] = (stage2['cosine_similarity'] - stage2['cosine_similarity'].min()) / (stage2['cosine_similarity'].max() - stage2['cosine_similarity'].min())
-    
-        stage2['Final'] = 0.5 * stage2['cosine_similarity'] + 0.5 * stage2['score']
-        stage2 = stage2.sort_values(by='Final', ascending=False)
-    
-        threshold_value = np.percentile(stage2['Final'], percentile_threshold)
-        recommendations_final = stage2[stage2['Final'] >= threshold_value]
-    
-        if selected_sites:
-            recommendations_final = recommendations_final[recommendations_final['Site'].isin(selected_sites)]
-        if selected_subtitle != 'All':
-            recommendations_final = recommendations_final[recommendations_final['Subtitle Languages'].fillna('').str.contains(selected_subtitle, na=False)]
-    
-        if recommendations_final.empty:
+        if recommendations is None or recommendations.empty:
             st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
             st.session_state.course_recommendations = None
             st.session_state.course_page = 0
         else:
-            st.session_state.course_recommendations = recommendations_final
-            st.session_state.course_page = 0
+            if 'cosine_similarity' not in recommendations.columns:
+                st.error("Error: 'cosine_similarity' column is missing from the recommendations DataFrame.")
+            else:
+                try:
+                    # Filter recommendations with cosine similarity > 0 and sort
+                    recommendations_final = recommendations[recommendations['cosine_similarity'] > 0]
+                    recommendations_final = recommendations_final.sort_values(by='cosine_similarity', ascending=False)
+                    
+                    if recommendations_final.empty:
+                        st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
+                        st.session_state.course_recommendations = None
+                        st.session_state.course_page = 0
+                    else:
+                        st.session_state.course_recommendations = recommendations_final
+                        st.session_state.course_page = 0
+                
+                except Exception as e:
+                    st.error(f"An error occurred while processing recommendations: {str(e)}")
     
     if 'course_recommendations' in st.session_state and st.session_state.course_recommendations is not None:
         recommendations = st.session_state.course_recommendations
@@ -650,6 +667,28 @@ elif page == '📚 Step 3: Grow':
             if end_index < len(recommendations):
                 if st.button("Next ➡️", key='course_next'):
                     st.session_state.course_page += 1
+
+    # Add the new button for adding your own course
+    st.markdown("""
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSedcvWeMfGsXcaoLO7lZ1MKi_EZq8fAimxlH7sxZAKZgNcslQ/viewform" target="_blank">
+            <button style="
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 14px;
+                margin: 4px 2px;
+                cursor: pointer;
+                border-radius: 8px;
+                transition: background-color 0.3s;
+            ">
+                ➕ Contribute to Course Data
+            </button>
+        </a>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     pass
