@@ -4,5 +4,4 @@ numpy
 scikit-learn
 gdown
 psutil
-gensim
 gspread
