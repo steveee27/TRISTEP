@@ -58,7 +58,7 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels=No
     return top_jobs
 
 
-def recommend_course(user_input, df, vectorizer, tfidf_matrix, selected_sites=None, selected_categories=None, selected_subtitle=None):
+def recommend_course(user_input, df, vectorizer, tfidf_matrix, selected_sites=None, selected_subtitle=None):
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
@@ -84,8 +84,6 @@ def recommend_course(user_input, df, vectorizer, tfidf_matrix, selected_sites=No
     # Apply filters after cosine similarity calculation
     if selected_sites:
         top_courses = top_courses[top_courses['Site'].isin(selected_sites)]
-    if selected_categories:
-        top_courses = top_courses[top_courses['Category'].isin(selected_categories)]
     if selected_subtitle and selected_subtitle != 'All':
         top_courses = top_courses[top_courses['Subtitle Languages'].str.contains(selected_subtitle, na=False)]
 
@@ -628,15 +626,6 @@ elif page == '📚 Step 3: Grow':
             if st.checkbox(site, key=f"site_{site}"):
                 selected_sites.append(site)
 
-    st.subheader('📊 Categories')
-    categories = [cat for cat in df_course['Category'].unique().tolist() if cat != "Unknown"]
-    selected_categories = []
-    cols = st.columns(2)
-    for i, cat in enumerate(categories):
-        with cols[i % 2]:
-            if st.checkbox(cat, key=f"cat_{cat}"):
-                selected_categories.append(cat)
-
     st.subheader('🗣️ Subtitle Language')
     unique_subtitles = ['All'] + sorted(set([lang.strip() for sublist in df_course['Subtitle Languages'].dropna().str.split(',') for lang in sublist if lang.strip() != 'Unknown']))
     selected_subtitle = st.selectbox('Choose a language', unique_subtitles)
@@ -654,7 +643,6 @@ elif page == '📚 Step 3: Grow':
             vectorizer_course, 
             tfidf_matrix_course,
             selected_sites if selected_sites else None,
-            selected_categories if selected_categories else None,
             selected_subtitle if selected_subtitle != 'All' else None
         )
         if recommendations is None or recommendations.empty:
