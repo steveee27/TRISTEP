@@ -548,15 +548,7 @@ elif page == '💼 Step 2: Find':
             with st.expander("📄 More Info"):
                 # Clean the description text from any HTML tags
                 clean_description = re.sub(r'<[^>]+>', '', str(row['description_x']))
-                
-                st.markdown(
-                    f"""
-                    <p style='text-align: justify;'>
-                    📝 Description: {clean_description}
-                    </p>
-                    """, 
-                    unsafe_allow_html=True
-                )
+                st.markdown(f"📝 Description: {clean_description}")
                 if row['min_salary'] == 'Unknown':
                     st.markdown(f"💰 Min Salary (Yearly): {row['min_salary']}")
                 else:
