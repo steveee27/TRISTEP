@@ -54,7 +54,7 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, w
     
     return top_jobs
 
-def recommend_course(user_input, df, vectorizer, tfidf_matrix):
+def recommend_course(user_input, df, vectorizer, tfidf_matrix, selected_subtitle):
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
@@ -72,7 +72,7 @@ def recommend_course(user_input, df, vectorizer, tfidf_matrix):
     top_course_indices = top_course_indices[np.argsort(cosine_similarities[top_course_indices])[::-1]]
 
     top_courses = df.iloc[top_course_indices].copy()
-
+    
     # Filter by subtitle language if not 'All'
     if selected_subtitle != 'All':
         top_courses = top_courses[top_courses['Subtitle Languages'].apply(lambda x: selected_subtitle in str(x).split(','))]
