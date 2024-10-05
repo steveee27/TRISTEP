@@ -21,22 +21,12 @@ def remove_asterisks(text):
         return text
     return re.sub(r'\*+', '', text)
 
-def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, work_types, name):
-    filtered_df = df.copy()
-    if experience_levels:
-        filtered_df = filtered_df[filtered_df['formatted_experience_level'].isin(experience_levels)]
-    if work_types:
-        filtered_df = filtered_df[filtered_df['formatted_work_type'].isin(work_types)]
-    if name and name != 'All':
-        filtered_df = filtered_df[filtered_df['name'] == name]
-    
-    if filtered_df.empty:
-        return None
-
+def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels=None, work_types=None, name=None, country=None):
+    # Jangan hitung ulang tfidf_matrix di sini
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
-    cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix[filtered_df.index]).flatten()
+    cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
     
     # Filter recommendations with cosine similarity > 0 and sort
     above_zero = cosine_similarities > 0
@@ -47,14 +37,28 @@ def recommend_job(user_input, df, vectorizer, tfidf_matrix, experience_levels, w
     
     top_job_indices = top_job_indices[np.argsort(cosine_similarities[top_job_indices])[::-1]]
     
-    top_jobs = filtered_df.iloc[top_job_indices].copy()
-    top_jobs.reset_index(drop=True, inplace=True)
-    
+    top_jobs = df.iloc[top_job_indices].copy()
     top_jobs['cosine_similarity'] = cosine_similarities[top_job_indices]
+    
+    # Apply filters after cosine similarity calculation
+    if experience_levels:
+        top_jobs = top_jobs[top_jobs['formatted_experience_level'].isin(experience_levels)]
+    if work_types:
+        top_jobs = top_jobs[top_jobs['formatted_work_type'].isin(work_types)]
+    if name and name != 'All':
+        top_jobs = top_jobs[top_jobs['name'] == name]
+    if country and country != 'All':
+        top_jobs = top_jobs[top_jobs['country'] == country]
+    
+    if top_jobs.empty:
+        return None
+
+    top_jobs.reset_index(drop=True, inplace=True)
     
     return top_jobs
 
-def recommend_course(user_input, df, vectorizer, tfidf_matrix):
+
+def recommend_course(user_input, df, vectorizer, tfidf_matrix, selected_sites=None, selected_categories=None, selected_subtitle=None):
     user_input_processed = preprocess_text_simple(user_input)
     user_tfidf = vectorizer.transform([user_input_processed])
     
@@ -69,19 +73,34 @@ def recommend_course(user_input, df, vectorizer, tfidf_matrix):
     above_threshold = cosine_similarities >= threshold
     top_course_indices = np.where(above_threshold)[0]
 
+    if len(top_course_indices) == 0:
+        return None
+
     top_course_indices = top_course_indices[np.argsort(cosine_similarities[top_course_indices])[::-1]]
 
     top_courses = df.iloc[top_course_indices].copy()
-    top_courses.reset_index(drop=True, inplace=True)
-    
     top_courses['cosine_similarity'] = cosine_similarities[top_course_indices]
 
-    return top_courses
+    # Apply filters after cosine similarity calculation
+    if selected_sites:
+        top_courses = top_courses[top_courses['Site'].isin(selected_sites)]
+    if selected_categories:
+        top_courses = top_courses[top_courses['Category'].isin(selected_categories)]
+    if selected_subtitle and selected_subtitle != 'All':
+        top_courses = top_courses[top_courses['Subtitle Languages'].str.contains(selected_subtitle, na=False)]
 
+    if top_courses.empty:
+        return None
+
+    top_courses.reset_index(drop=True, inplace=True)
+    return top_courses
 @st.cache_data
 def load_job_data():
     csv_url = 'https://docs.google.com/spreadsheets/d/1huKbxP4W5c5sBWAQ5LzerhdId6TR9glCRFKn7DNOKEE/export?format=csv&gid=1980208131'
     df_job = pd.read_csv(csv_url, on_bad_lines='skip', engine='python')
+    
+    # Drop duplicates based on 'description_x'
+    df_job = df_job.drop_duplicates(subset=['description_x'])
     
     df_job['Combined'] = df_job['title'].fillna('') + ' ' + df_job['description_x'].fillna('') + ' ' + df_job['skills_desc'].fillna('')
     df_job['Combined'] = df_job['Combined'].apply(preprocess_text_simple)
@@ -503,15 +522,19 @@ elif page == '💼 Step 2: Find':
     user_input = st.text_area(
     "🧑‍💼 Prompt your career profile (e.g., education background, key skills, project experience, certifications, and interests)", 
     height=150,
-    help="For better recommendations, provide detailed information such as:\n\n 'I am a Data Science graduate with a strong background in statistics, machine learning, and data analytics. I've completed projects like building predictive models for financial forecasting and creating recommendation systems for e-commerce. My skills include Python, R, SQL, and experience with big data tools like Hadoop and Spark. I'm passionate about using data to solve complex problems, particularly in finance and retail, and have earned certifications in Data Science and Big Data Analytics.'")
+    help="For better recommendations, provide detailed information such as:\n\n 'I am a Programmer with experience in designing, developing, testing, and maintaining complex applications. I have a strong understanding of industry best practices, and I'm proficient in writing clean, efficient code. I have experience collaborating with cross-functional teams, working with external APIs, and ensuring optimal application performance and quality. I am also skilled in identifying and resolving bottlenecks and bugs to maintain high code quality.'")
     
     if st.button("🚀 Get Job Insights", key="get_job_recommendations"):
-        # Filter the job DataFrame based on the location selection
-        filtered_df = df_job.copy()
-        if selected_country != 'All':
-            filtered_df = filtered_df[filtered_df['country'] == selected_country]
-        
-        recommendations = recommend_job(user_input, filtered_df, vectorizer_job, tfidf_matrix_job, selected_experience_levels, selected_work_types, name)
+        recommendations = recommend_job(
+            user_input,
+            df_job,
+            vectorizer_job,
+            tfidf_matrix_job,
+            selected_experience_levels if selected_experience_levels else None,
+            selected_work_types if selected_work_types else None,
+            name if name != 'All' else None,
+            selected_country if selected_country != 'All' else None
+        )
         if recommendations is None or recommendations.empty:
             st.error("😕 No relevant jobs found matching your criteria. Please try adjusting your filters or providing more details in your career profile.")
             st.session_state.job_recommendations = None
@@ -528,6 +551,7 @@ elif page == '💼 Step 2: Find':
         end_index = start_index + items_per_page
     
         st.write("### 🎯 Here Are The Most Suitable Jobs For You:")
+        # Adjust the job description display to be justified
         for i, (_, row) in enumerate(recommendations.iloc[start_index:end_index].iterrows(), start=start_index + 1):
             st.markdown(f"#### {i}. {row['title']}")
             st.markdown(f"🏢 Company Name: {row['name']}")
@@ -535,7 +559,11 @@ elif page == '💼 Step 2: Find':
             st.markdown(f"📍 City: {row['city']}")
             st.markdown(f"[🔗 View Job Posting]({row['job_posting_url']})")
             with st.expander("📄 More Info"):
-                st.markdown(f"📝 Description: {row['description_x']}")
+                # Applying justify alignment to the description
+                st.markdown(
+                    f"<p style='text-align: justify;'>{row['description_x']}</p>", 
+                    unsafe_allow_html=True
+                )
                 if row['min_salary'] == 'Unknown':
                     st.markdown(f"💰 Min Salary (Yearly): {row['min_salary']}")
                 else:
@@ -545,8 +573,9 @@ elif page == '💼 Step 2: Find':
                 else:
                     st.markdown(f"💵 Max Salary (Yearly): Rp{row['max_salary']}")
                 st.markdown(f"🕒 Work Type: {row['formatted_work_type']}")
-                st.markdown(f"🎓 Experience Level: {row['formatted_experience_level']}")       
+                st.markdown(f"🎓 Experience Level: {row['formatted_experience_level']}")
             st.markdown("---")
+
     
         col1, col2, col3 = st.columns([1, 6, 1])
         with col1:
@@ -589,60 +618,60 @@ elif page == '📚 Step 3: Grow':
         st.image(image2_path)
     with col3:
         st.write(' ')
+
     st.subheader('🌐 Sites')
-    unique_sites = sorted(df_course['Site'].unique())
-    col1, col2 = st.columns(2)
+    sites = [site for site in df_course['Site'].unique().tolist() if site != "Unknown"]
     selected_sites = []
-    for i, site in enumerate(unique_sites):
-        if i % 2 == 0:
-            if col1.checkbox(site, key=f"site_{site}"):
+    cols = st.columns(2)
+    for i, site in enumerate(sites):
+        with cols[i % 2]:
+            if st.checkbox(site, key=f"site_{site}"):
                 selected_sites.append(site)
-        else:
-            if col2.checkbox(site, key=f"site_{site}"):
-                selected_sites.append(site)
+
+    st.subheader('📊 Categories')
+    categories = [cat for cat in df_course['Category'].unique().tolist() if cat != "Unknown"]
+    selected_categories = []
+    cols = st.columns(2)
+    for i, cat in enumerate(categories):
+        with cols[i % 2]:
+            if st.checkbox(cat, key=f"cat_{cat}"):
+                selected_categories.append(cat)
 
     st.subheader('🗣️ Subtitle Language')
-    unique_subtitles = sorted(set([lang.strip() for sublist in df_course['Subtitle Languages'].dropna().str.split(',') for lang in sublist if lang.strip() != 'Unknown']))
-    selected_subtitle = st.selectbox('Choose a language', ['All'] + unique_subtitles)
+    unique_subtitles = ['All'] + sorted(set([lang.strip() for sublist in df_course['Subtitle Languages'].dropna().str.split(',') for lang in sublist if lang.strip() != 'Unknown']))
+    selected_subtitle = st.selectbox('Choose a language', unique_subtitles)
 
-    user_input = st.text_area("🔍 Prompt skills or topics you'd like to learn:", 
-                          height=150,
-                          help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
+    user_input = st.text_area(
+        "🔍 Prompt skills or topics you'd like to learn:", 
+        height=150,
+        help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'"
+    )
 
     if st.button("🚀 Get Course Recommendations", key="get_course_recommendations"):
-        recommendations = recommend_course(user_input, df_course, vectorizer_course, tfidf_matrix_course)
-        
+        recommendations = recommend_course(
+            user_input, 
+            df_course, 
+            vectorizer_course, 
+            tfidf_matrix_course,
+            selected_sites if selected_sites else None,
+            selected_categories if selected_categories else None,
+            selected_subtitle if selected_subtitle != 'All' else None
+        )
         if recommendations is None or recommendations.empty:
-            st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
+            st.error("😕 No relevant courses found matching your criteria. Please try adjusting your filters or providing more details in your learning interests.")
             st.session_state.course_recommendations = None
             st.session_state.course_page = 0
         else:
-            if 'cosine_similarity' not in recommendations.columns:
-                st.error("Error: 'cosine_similarity' column is missing from the recommendations DataFrame.")
-            else:
-                try:
-                    # Filter recommendations with cosine similarity > 0 and sort
-                    recommendations_final = recommendations[recommendations['cosine_similarity'] > 0]
-                    recommendations_final = recommendations_final.sort_values(by='cosine_similarity', ascending=False)
-                    
-                    if recommendations_final.empty:
-                        st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
-                        st.session_state.course_recommendations = None
-                        st.session_state.course_page = 0
-                    else:
-                        st.session_state.course_recommendations = recommendations_final
-                        st.session_state.course_page = 0
-                
-                except Exception as e:
-                    st.error(f"An error occurred while processing recommendations: {str(e)}")
-    
+            st.session_state.course_recommendations = recommendations
+            st.session_state.course_page = 0
+
     if 'course_recommendations' in st.session_state and st.session_state.course_recommendations is not None:
         recommendations = st.session_state.course_recommendations
         page = st.session_state.course_page
         items_per_page = 5
         start_index = page * items_per_page
         end_index = start_index + items_per_page
-    
+
         st.write("### 🎯 Here Are The Most Suitable Courses For You:")
         for i, (_, row) in enumerate(recommendations.iloc[start_index:end_index].iterrows(), start=start_index + 1):
             st.markdown(f"#### {i}. {row['Title']}")
@@ -657,7 +686,7 @@ elif page == '📚 Step 3: Grow':
                 st.markdown(f"🗣️ Language: {row['Language']}")
                 st.markdown(f"🔠 Subtitle Languages: {row['Subtitle Languages']}")
             st.markdown("---")
-    
+
         col1, col2, col3 = st.columns([1, 6, 1])
         with col1:
             if start_index > 0:
@@ -689,6 +718,5 @@ elif page == '📚 Step 3: Grow':
             </button>
         </a>
     """, unsafe_allow_html=True)
-
 if __name__ == "__main__":
     pass
