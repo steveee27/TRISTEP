@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/efaa26f0-23fa-49ed-95e0-a216d60828f2)# TRISTEP: AI-Driven Talent Development Platform Empowering Indonesia Through Three Simple Steps
+# TRISTEP: AI-Driven Talent Development Platform Empowering Indonesia Through Three Simple Steps
 
 TRISTEP is an innovative AI-powered platform designed to bridge the gap between the supply and demand of digital talent in Indonesia. The platform helps users explore industry trends, find suitable job opportunities, and grow their skills through relevant online courses. By leveraging advanced vectorization techniques like TF-IDF, WORD2VEC, and BERT, TRISTEP delivers accurate and efficient recommendations tailored to individual user preferences.
 
