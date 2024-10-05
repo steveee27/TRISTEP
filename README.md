@@ -1,11 +1,11 @@
-# TRISTEP: AI-Driven Talent Development Platform Empowering Indonesia Through Three Simple Steps
+![image](https://github.com/user-attachments/assets/efaa26f0-23fa-49ed-95e0-a216d60828f2)# TRISTEP: AI-Driven Talent Development Platform Empowering Indonesia Through Three Simple Steps
 
 TRISTEP is an innovative AI-powered platform designed to bridge the gap between the supply and demand of digital talent in Indonesia. The platform helps users explore industry trends, find suitable job opportunities, and grow their skills through relevant online courses. By leveraging advanced vectorization techniques like TF-IDF, WORD2VEC, and BERT, TRISTEP delivers accurate and efficient recommendations tailored to individual user preferences.
 
 ## 🌐 Try TRISTEP Yourself
 Experience the TRISTEP platform firsthand by visiting: [Access TRISTEP Platform](https://tristep.streamlit.app/)
 
-For a guided tour on how to use the platform, check out our live demo video: [Watch the Demo](https://your-demo-video-link)
+For a guided tour on how to use the platform, check out our live demo video: [Watch the Demo](https://youtu.be/b5qtDCex9Ts?si=R6DS-VD32_0Zo84I)
 
 ## Table of Contents
 
@@ -32,7 +32,7 @@ TRISTEP addresses the growing need for digital talent by offering a structured a
 
 TRISTEP utilizes two primary datasets:
 
-1. **[Job Postings LinkedIn](https://www.kaggle.com/code/enricofindley/linkedin-job-postings-2023-data-analysis):** Contains 15,886 job postings from LinkedIn, including attributes such as job title, description, salary, location, and company details.
+1. **[Job Postings LinkedIn](https://www.kaggle.com/code/enricofindley/linkedin-job-postings-2023-data-analysis), [Job Postings Jobstreet](https://www.kaggle.com/datasets/azizainunnajib/jobs-crawling):** Contains 49,194 job postings from LinkedIn & Jobstreet including attributes such as job title, description, salary, location, and company details.
 2. **[Online Courses](https://www.kaggle.com/code/enricofindley/linkedin-job-postings-2023-data-analysis):** Contains 8,092 online courses from platforms like Coursera, Udacity, and others, with detailed information such as course title, description, rating, and more.
 
 These datasets are used to train and evaluate the recommendation models that power the TRISTEP platform.
@@ -60,15 +60,15 @@ The recommendation models were trained using Kaggle Notebooks equipped with two 
 
 ## Results
 
-| Method   | Prec@10 (Jobs) | Prec@10 (Courses) | Processing Time (s) |
+| Method   | Prec@5 (Jobs) | Prec@5 (Courses) | Processing Time (s) |
 |----------|----------------|-------------------|---------------------|
-| TF-IDF   | 0.846          | 0.836             | Moderate            |
-| WORD2VEC | 0.462          | 0.296             | Fast (Jobs), Slow (Courses) |
-| BERT     | 0.502          | 0.654             | Slow                |
+| TF-IDF   | 0.900          | 0.860             | Moderate            |
+| WORD2VEC | 0.532          | 0.304             | Fast (Jobs), Slow (Courses) |
+| BERT     | 0.440          | 0.668             | Slow                |
 
 TF-IDF emerged as the most balanced method, offering high accuracy with reasonable processing times, making it the preferred choice for the TRISTEP platform.
 
-You can review the detailed evaluation and analysis [here](https://www.kaggle.com/code/enricofindley/linkedin-job-postings-2023-data-analysis).
+
 
 ## System Requirements
 
