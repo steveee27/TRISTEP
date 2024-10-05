@@ -72,8 +72,12 @@ def recommend_course(user_input, df, vectorizer, tfidf_matrix):
     top_course_indices = top_course_indices[np.argsort(cosine_similarities[top_course_indices])[::-1]]
 
     top_courses = df.iloc[top_course_indices].copy()
-    top_courses.reset_index(drop=True, inplace=True)
+
+    # Filter by subtitle language if not 'All'
+    if selected_subtitle != 'All':
+        top_courses = top_courses[top_courses['Subtitle Languages'].apply(lambda x: selected_subtitle in str(x).split(','))]
     
+    top_courses.reset_index(drop=True, inplace=True)
     top_courses['cosine_similarity'] = cosine_similarities[top_course_indices]
 
     return top_courses
@@ -609,32 +613,32 @@ elif page == '📚 Step 3: Grow':
                           height=150,
                           help="For better recommendations, provide topic or job desk from the company, such as:\n\n 'The job responsibilities I want to gain experience in include Data Engineering, Big Data Technologies, Data Transformation, and Data Modelling.'")
 
-    if st.button("🚀 Get Course Recommendations", key="get_course_recommendations"):
-        recommendations = recommend_course(user_input, df_course, vectorizer_course, tfidf_matrix_course)
-        
-        if recommendations is None or recommendations.empty:
-            st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
-            st.session_state.course_recommendations = None
-            st.session_state.course_page = 0
+if st.button("🚀 Get Course Recommendations", key="get_course_recommendations"):
+    recommendations = recommend_course(user_input, df_course, vectorizer_course, tfidf_matrix_course, selected_subtitle)
+    
+    if recommendations is None or recommendations.empty:
+        st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
+        st.session_state.course_recommendations = None
+        st.session_state.course_page = 0
+    else:
+        if 'cosine_similarity' not in recommendations.columns:
+            st.error("Error: 'cosine_similarity' column is missing from the recommendations DataFrame.")
         else:
-            if 'cosine_similarity' not in recommendations.columns:
-                st.error("Error: 'cosine_similarity' column is missing from the recommendations DataFrame.")
-            else:
-                try:
-                    # Filter recommendations with cosine similarity > 0 and sort
-                    recommendations_final = recommendations[recommendations['cosine_similarity'] > 0]
-                    recommendations_final = recommendations_final.sort_values(by='cosine_similarity', ascending=False)
-                    
-                    if recommendations_final.empty:
-                        st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
-                        st.session_state.course_recommendations = None
-                        st.session_state.course_page = 0
-                    else:
-                        st.session_state.course_recommendations = recommendations_final
-                        st.session_state.course_page = 0
+            try:
+                # Filter recommendations with cosine similarity > 0 and sort
+                recommendations_final = recommendations[recommendations['cosine_similarity'] > 0]
+                recommendations_final = recommendations_final.sort_values(by='cosine_similarity', ascending=False)
                 
-                except Exception as e:
-                    st.error(f"An error occurred while processing recommendations: {str(e)}")
+                if recommendations_final.empty:
+                    st.warning("😕 No courses found matching your criteria. Please try adjusting your filters or broadening your search terms.")
+                    st.session_state.course_recommendations = None
+                    st.session_state.course_page = 0
+                else:
+                    st.session_state.course_recommendations = recommendations_final
+                    st.session_state.course_page = 0
+            
+            except Exception as e:
+                st.error(f"An error occurred while processing recommendations: {str(e)}")
     
     if 'course_recommendations' in st.session_state and st.session_state.course_recommendations is not None:
         recommendations = st.session_state.course_recommendations
