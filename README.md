@@ -7,6 +7,8 @@ Experience the TRISTEP platform firsthand by visiting: [Access TRISTEP Platform]
 
 For a guided tour on how to use the platform, check out our live demo video: [Watch the Demo](https://youtu.be/b5qtDCex9Ts?si=R6DS-VD32_0Zo84I)
 
+> **Note:** An admin website is also available for managing user-generated data. When users add job or course information, admins can verify these submissions through the admin site: [TRISTEP Admin](https://tristep-adm1n.streamlit.app/)
+
 ## Table of Contents
 
 - [Introduction](#introduction)
